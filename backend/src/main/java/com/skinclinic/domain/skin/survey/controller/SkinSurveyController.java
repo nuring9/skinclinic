@@ -25,4 +25,11 @@ public class SkinSurveyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
         // 2. HTTP 상태코드 201(Created)과 함께 결과 DTO 반환
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SkinSurveyResponse> getSkinSurvey(@PathVariable Long id) {
+        SkinSurveyResponse response = skinSurveyService.getSkinSurvey(id);
+
+        return ResponseEntity.ok(response);
+    }
 }

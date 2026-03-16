@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +22,10 @@ public class SkinSurveyService {
         SkinSurvey skinSurvey = SkinSurvey.builder()
                 .skinType(request.getSkinType())
                 .concerns(request.getConcerns() != null ? request.getConcerns() : new HashSet<>())
+                .questionAnswers(request.getQuestionAnswers() != null ? request.getQuestionAnswers() : new LinkedHashMap<>())
                 .build();
 
         SkinSurvey savedSkinSurvey = skinSurveyRepository.save(skinSurvey);
-
         return SkinSurveyResponse.from(savedSkinSurvey);
     }
 

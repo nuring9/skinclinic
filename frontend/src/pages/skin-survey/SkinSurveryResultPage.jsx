@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSkinSurvey } from "@/api/skinSurveyApi";
-import { skinTypes, skinConcerns } from "@/constants/skinSurveyOptions";
+import {
+  getAnswerLabel,
+  getQuestionTitle,
+  getSkinConcernLabel,
+  getSkinTypeLabel,
+} from "@/constants/skinSurveyOptions";
 import "./skin-survey.css";
 import { createRecommendation } from "@/api/recommendationApi";
 
@@ -30,16 +35,6 @@ export default function SkinSurveyResultPage() {
     fetchSurveyResult();
   }, [id]);
 
-  const getSkinTypeLabel = (value) => {
-    return skinTypes.find((type) => type.value === value)?.label || value;
-  };
-
-  const getSkinConcernLabel = (value) => {
-    return (
-      skinConcerns.find((concern) => concern.value === value)?.label || value
-    );
-  };
-
   const handleCreateRecommendation = async () => {
     try {
       setRecommendationLoading(true);
@@ -53,7 +48,6 @@ export default function SkinSurveyResultPage() {
     }
   };
 
-  // 스켈레톤(Skeleton) UI
   if (loading) {
     return (
       <div className="survey-page">
@@ -103,7 +97,7 @@ export default function SkinSurveyResultPage() {
             <div>
               <span className="survey-badge">RESULT REPORT</span>
               <h1>피부 진단 결과</h1>
-              <p>입력한 피부 타입과 고민을 바탕으로 현재 상태를 정리했어요.</p>
+              <p>입력한 피부 타입, 고민, 추가 문진 답변을 정리했어요.</p>
             </div>
             <div className="result-hero__number">
               <span>Survey No.</span>
@@ -116,7 +110,7 @@ export default function SkinSurveyResultPage() {
               <p className="result-card__label">피부 타입</p>
               <h2>{getSkinTypeLabel(result.skinType)}</h2>
               <p className="result-card__desc">
-                선택한 피부 타입을 기준으로 관리 방향을 설정할 수 있어요.
+                선택한 피부 타입은 추천 시술 점수의 기본 가중치로 반영돼요.
               </p>
             </div>
 
@@ -137,6 +131,26 @@ export default function SkinSurveyResultPage() {
           </div>
 
           <div className="result-card">
+            <p className="result-card__label">추가 문진 답변</p>
+            <div className="result-answer-list">
+              {Object.entries(result.questionAnswers || {}).length > 0 ? (
+                Object.entries(result.questionAnswers || {}).map(
+                  ([code, value]) => (
+                    <div className="result-answer-item" key={code}>
+                      <strong>{getQuestionTitle(code)}</strong>
+                      <span>{getAnswerLabel(value)}</span>
+                    </div>
+                  ),
+                )
+              ) : (
+                <p className="result-empty">
+                  저장된 추가 문진 답변이 없습니다.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="result-card">
             <p className="result-card__label">요약</p>
             <div className="result-summary">
               <div className="summary-box">
@@ -148,8 +162,10 @@ export default function SkinSurveyResultPage() {
                 <strong>{result.concerns?.length || 0}개</strong>
               </div>
               <div className="summary-box">
-                <span>설문 번호</span>
-                <strong>{result.id}</strong>
+                <span>추가 문항</span>
+                <strong>
+                  {Object.keys(result.questionAnswers || {}).length}개
+                </strong>
               </div>
             </div>
           </div>

@@ -1,12 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { createSkinSurvey } from "@/api/skinSurveyApi";
-import { skinTypes, skinConcerns } from "@/constants/skinSurveyOptions";
+import {
+  answerOptions,
+  skinConcerns,
+  skinTypes,
+  surveyQuestions,
+} from "@/constants/skinSurveyOptions";
 import "./skin-survey.css";
 
 export default function SkinSurveyPage() {
   const [skinType, setSkinType] = useState("");
   const [concerns, setConcerns] = useState([]);
+  const [questionAnswers, setQuestionAnswers] = useState({});
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -18,6 +24,13 @@ export default function SkinSurveyPage() {
     );
   };
 
+  const handleAnswerChange = (questionCode, answerValue) => {
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [questionCode]: answerValue,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -26,8 +39,17 @@ export default function SkinSurveyPage() {
       return;
     }
 
+    if (Object.keys(questionAnswers).length !== surveyQuestions.length) {
+      setMessage("추가 설문 10문항에 모두 답변해주세요.");
+      return;
+    }
+
     try {
-      const result = await createSkinSurvey({ skinType, concerns });
+      const result = await createSkinSurvey({
+        skinType,
+        concerns,
+        questionAnswers,
+      });
       setMessage("설문이 저장되었습니다.");
       navigate(`/result/${result.id}`);
     } catch (error) {
@@ -47,8 +69,8 @@ export default function SkinSurveyPage() {
             피부 솔루션 찾기
           </h1>
           <p className="survey-hero__desc">
-            간단한 피부 설문을 통해 현재 피부 타입과 고민을 확인하고, 나에게
-            맞는 관리 방향을 추천받아보세요.
+            피부 타입, 고민, 추가 문진 10문항을 바탕으로 점수를 합산해서 맞춤
+            시술을 추천해드려요.
           </p>
         </div>
         <div className="survey-hero__image">
@@ -68,8 +90,8 @@ export default function SkinSurveyPage() {
             <p className="survey-section-kicker">1:1 피부 분석 설문</p>
             <h2>피부 상태를 선택해주세요</h2>
             <p>
-              문진 형식으로 간단하게 체크하면, 결과 화면에서 선택한 내용을 보기
-              좋게 확인할 수 있어요.
+              기본 정보와 추가 질문 점수를 합산해 5점 이상인 시술 중 상위 3개만
+              추천해드려요.
             </p>
           </div>
 
@@ -129,6 +151,56 @@ export default function SkinSurveyPage() {
                     />
                     <span>{concern.label}</span>
                   </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="survey-divider" />
+
+            <div className="survey-block">
+              <div className="survey-block__top">
+                <span className="survey-step">STEP 03</span>
+                <h3>추가 피부 문진</h3>
+                <p>문항별 답변 점수가 누적되어 추천 시술 점수에 반영됩니다.</p>
+              </div>
+
+              <div className="survey-question-list">
+                {surveyQuestions.map((question, index) => (
+                  <div className="survey-question-card" key={question.code}>
+                    <div className="survey-question-card__top">
+                      <span className="survey-question-number">
+                        Q{String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h4>{question.title}</h4>
+                      <p>{question.description}</p>
+                    </div>
+
+                    <div className="survey-answer-grid">
+                      {answerOptions.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`survey-answer-card ${
+                            questionAnswers[question.code] === option.value
+                              ? "active"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={question.code}
+                            value={option.value}
+                            checked={
+                              questionAnswers[question.code] === option.value
+                            }
+                            onChange={() =>
+                              handleAnswerChange(question.code, option.value)
+                            }
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

@@ -6,6 +6,7 @@ import com.skinclinic.domain.skin.survey.enumtype.SkinType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -16,6 +17,7 @@ public class SkinSurveyResponse {
     private Long id;
     private SkinType skinType;
     private Set<SkinConcern> concerns;
+    private Map<String, String> questionAnswers;
 
     public static SkinSurveyResponse from(SkinSurvey skinSurvey){
         // SkinSurvey를 받아서 SkinSurveyResponse를 반환하는 from 메서드 생성.
@@ -23,6 +25,7 @@ public class SkinSurveyResponse {
                 .id(skinSurvey.getId())
                 .skinType(skinSurvey.getSkinType())
                 .concerns(skinSurvey.getConcerns())
+                .questionAnswers(skinSurvey.getQuestionAnswers())
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -20,6 +21,8 @@ public class RecommendationResponse {
     private String skinTypeCode; // 피부 타입 코드
 
     private List<String> concernCodes; // 피부 고민 코드 리스트
+
+    private Map<String, String> questionAnswers;  // 설문 추가
 
     private List<ProcedureRecommendationDto> recommendations; // 추천된 시술 목록(시술명, 점수, 이유)
 

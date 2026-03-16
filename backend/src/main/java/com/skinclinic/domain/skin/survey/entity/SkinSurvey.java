@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -37,9 +39,20 @@ public class SkinSurvey {
     @Column(name = "concern")
     private Set<SkinConcern> concerns = new HashSet<>();
 
+
+    @ElementCollection
+    @CollectionTable(
+            name = "skin_survey_answer",
+            joinColumns = @JoinColumn(name = "skin_survey_id")
+    )
+    @MapKeyColumn(name = "question_code")
+    @Column(name = "answer_code")
+    private Map<String, String> questionAnswers = new LinkedHashMap<>();
+
     @Builder
-    public SkinSurvey(SkinType skinType, Set<SkinConcern> concerns){
+    public SkinSurvey(SkinType skinType, Set<SkinConcern> concerns, Map<String, String> questionAnswers){
         this.skinType = skinType;
         this.concerns = concerns != null ? concerns : new HashSet<>();
+        this.questionAnswers = questionAnswers != null ? questionAnswers : new LinkedHashMap<>();
     }
 }

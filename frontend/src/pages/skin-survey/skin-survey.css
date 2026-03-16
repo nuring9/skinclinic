@@ -342,6 +342,7 @@ body {
   margin-top: 28px;
   display: flex;
   justify-content: flex-end;
+  gap: 16px;
 }
 
 .survey-submit-btn,
@@ -591,5 +592,109 @@ body {
   .survey-submit-btn,
   .survey-outline-btn {
     width: 100%;
+  }
+}
+
+.survey-question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.survey-question-card {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.survey-question-card__top h4 {
+  margin: 6px 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.survey-question-card__top p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.survey-question-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--point-dark);
+  letter-spacing: 0.08em;
+}
+
+.survey-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.survey-answer-card {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-soft);
+  transition: all 0.2s ease;
+}
+
+.survey-answer-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.survey-answer-card.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #b49788, #8d6f61);
+  color: #fff;
+  box-shadow: 0 12px 22px rgba(141, 111, 97, 0.18);
+}
+
+.result-answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-answer-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+}
+
+.result-answer-item strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.result-answer-item span {
+  color: var(--point-dark);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .survey-answer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-answer-item {
+    flex-direction: column;
   }
 }

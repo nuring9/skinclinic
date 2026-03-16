@@ -5,6 +5,7 @@ import com.skinclinic.domain.skin.survey.enumtype.SkinType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -15,4 +16,5 @@ public class SkinSurveyRequest {
 
     private SkinType skinType;
     private Set<SkinConcern> concerns;
+    private Map<String, String> questionAnswers; // 설문 추가
 }

@@ -297,3 +297,43 @@
     align-items: stretch;
   }
 }
+
+.recommendation-answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recommendation-answer-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #faf7f4;
+  border: 1px solid #ede2da;
+}
+
+.recommendation-answer-item strong {
+  font-size: 15px;
+}
+
+.recommendation-answer-item span {
+  color: #9b7d6c;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.procedure-rank {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b18055;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  .recommendation-answer-item {
+    flex-direction: column;
+  }
+}

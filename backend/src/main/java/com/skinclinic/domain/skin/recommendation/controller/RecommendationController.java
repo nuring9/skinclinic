@@ -34,7 +34,8 @@ public class RecommendationController {
         return ResponseEntity.ok(recommendationService.getRecommendation(recommendationId));
     }
 
-    // 설문 기준 이력 조회
+    // 설문 기준 이력 조회 (관리자용에서 사용)
+    // 추후 필요하면 관리자 페이지에서 검색창으로 surveyId 입력해서 조회 같은 기능
     @GetMapping("/survey/{surveyId}")
     public ResponseEntity<Page<RecommendationResponse>> getRecommendationHistories(
             @PathVariable Long surveyId,

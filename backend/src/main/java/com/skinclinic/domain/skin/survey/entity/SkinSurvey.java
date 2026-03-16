@@ -20,6 +20,10 @@ public class SkinSurvey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 추가: 이 설문을 작성한 사용자의 ID
+    @Column(name = "user_id")
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "skin_type", nullable = false)
     private SkinType skinType;

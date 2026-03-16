@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getSkinSurvey } from "@/api/skinSurveyApi";
 import { skinTypes, skinConcerns } from "@/constants/skinSurveyOptions";
 import "./skin-survey.css";
+import { createRecommendation } from "@/api/recommendationApi";
 
 export default function SkinSurveyResultPage() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function SkinSurveyResultPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [recommendationLoading, setRecommendationLoading] = useState(false);
 
   useEffect(() => {
     const fetchSurveyResult = async () => {
@@ -38,6 +40,20 @@ export default function SkinSurveyResultPage() {
     );
   };
 
+  const handleCreateRecommendation = async () => {
+    try {
+      setRecommendationLoading(true);
+      const data = await createRecommendation(Number(id));
+      navigate(`/recommendations/${data.recommendationId}`);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("추천 결과 생성에 실패했습니다.");
+    } finally {
+      setRecommendationLoading(false);
+    }
+  };
+
+  // 스켈레톤(Skeleton) UI
   if (loading) {
     return (
       <div className="survey-page">
@@ -144,6 +160,15 @@ export default function SkinSurveyResultPage() {
               onClick={() => navigate("/skin-survey")}
             >
               다시 설문하기
+            </button>
+            <button
+              className="survey-submit-btn"
+              onClick={handleCreateRecommendation}
+              disabled={recommendationLoading}
+            >
+              {recommendationLoading
+                ? "추천 생성 중..."
+                : "맞춤 시술 추천 받기"}
             </button>
           </div>
         </div>

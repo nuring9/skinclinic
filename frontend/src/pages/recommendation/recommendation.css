@@ -180,6 +180,7 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .recommendation-actions button {
@@ -194,6 +195,94 @@
 
 .recommendation-actions button:hover {
   opacity: 0.92;
+}
+
+/* 1. 페이징 컨트롤러 스타일 추가 */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 30px;
+  padding: 20px 0;
+  border-top: 1px dashed #ede2da;
+}
+
+.paging-btn {
+  padding: 10px 24px;
+  border: 1px solid #9b7d6c;
+  background: #fff;
+  color: #9b7d6c;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.paging-btn:hover:not(:disabled) {
+  background: #9b7d6c;
+  color: #fff;
+}
+
+.paging-btn:disabled {
+  border-color: #d1c7c0;
+  color: #d1c7c0;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+
+.page-indicator {
+  font-size: 15px;
+  color: #6d584c;
+}
+
+.page-indicator strong {
+  color: #9b7d6c;
+  font-size: 18px;
+}
+
+/* 2. 히스토리 아이템 호버 효과 강화 */
+.history-item {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.history-item:hover:not(.active) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 125, 108, 0.1);
+  border-color: #caa791;
+}
+
+/* 3. 로딩 애니메이션 (선택 사항) */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.loading-text {
+  animation: pulse 1.5s infinite ease-in-out;
+  color: #9b7d6c;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 4. 액션 버튼 스타일 다양화 (설문 결과 버튼은 조금 다르게) */
+.recommendation-actions button:nth-child(2) {
+  background: #fff;
+  color: #9b7d6c;
+  border: 1px solid #9b7d6c;
+}
+
+.recommendation-actions button:nth-child(2):hover {
+  background: #fdfaf8;
 }
 
 @media (max-width: 768px) {

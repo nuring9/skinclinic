@@ -4,6 +4,7 @@ import SkinSurveyPage from "@/pages/skin-survey/SkinSurveyPage";
 import SkinSurveyResultPage from "@/pages/skin-survey/SkinSurveryResultPage";
 import RecommendationHistoryPage from "@/pages/recommendation/RecommendationHistoryPage";
 import RecommendationResultPage from "@/pages/recommendation/RecommendationResultPage";
+import MainLayout from "@/layouts/MainLayout";
 
 const router = createBrowserRouter([
   // 1. 홈/랜딩 페이지
@@ -31,6 +32,15 @@ const router = createBrowserRouter([
     // :recommendationId는 추천 이력의 고유 ID를 의미함
     path: "/recommendations/:recommendationId",
     element: <RecommendationResultPage />,
+  },
+  {
+    // 6. 챗봇
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <MainPage /> },
+      { path: "skin-survey", element: <SkinSurveyPage /> },
+    ],
   },
 ]);
 

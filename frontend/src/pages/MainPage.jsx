@@ -17,7 +17,7 @@ export default function MainPage() {
       <br />
       <br />
 
-      {/* 2. 전체 목록 (이건 그대로 두시면 됩니다) */}
+      {/* 2. 전체 목록 */}
       <Link to="/recommendations">
         <button>전체 추천 이력 목록 보기</button>
       </Link>
@@ -28,6 +28,8 @@ export default function MainPage() {
       <Link to={`/recommendations/${sampleId}`}>
         <button>최근 맞춤 시술 추천 상세 보기</button>
       </Link>
+      <br />
+      <br />
     </div>
   );
 }

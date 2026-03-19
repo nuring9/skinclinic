@@ -5,7 +5,6 @@ import com.skinclinic.domain.consultation.chatbot.dto.ChatbotResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ChatbotService {
+
 
     private final GeminiChatService geminiChatService;
     private final Map<String, Node> nodes = new LinkedHashMap<>();
@@ -226,17 +226,22 @@ public class ChatbotService {
     }
 
     // 사용자 선택에 따른 답변 (ai 강화 로직 포함)
-    public ChatbotResponse reply(String optionCode){
+    public ChatbotResponse reply(String optionCode) {
         Node node = nodes.get(optionCode);
+
         String answer = node.answer();
         boolean aiEnhanced = false;
 
-        if(node.leaf()) {
-            // AI가 답변을 더 보강하는 지점.
-            String aiAnswer = geminiChatService.enrich(node.label(), answer);
-            aiEnhanced = !aiAnswer.equals(answer);
-            answer = aiAnswer;
+
+        if (node.leaf()) {
+            GeminiChatService.GeminiResult result =
+                    geminiChatService.enrich(node.label(), answer);
+
+            answer = result.answer();
+            aiEnhanced = result.enhanced();
+
         }
+
         return toResponse(node, answer, aiEnhanced);
     }
 

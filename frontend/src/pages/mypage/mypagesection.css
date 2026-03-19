@@ -1,0 +1,29 @@
+.mypage-section-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+}
+
+.mypage-section-card h2 {
+  margin: 0 0 16px;
+  color: #3b2f2a;
+}
+
+.mypage-section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mypage-section-item {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #faf7f4;
+  border: 1px solid #ede2da;
+}
+
+.mypage-section-item p {
+  margin: 6px 0 0;
+  color: #655b55;
+}

@@ -1,0 +1,77 @@
+.mypage-page {
+  min-height: 100vh;
+  background: #f7f4f1;
+  padding: 40px 20px 80px;
+}
+
+.mypage-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.mypage-sidebar {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 28px 22px;
+  position: sticky;
+  top: 24px;
+}
+
+.mypage-title-link {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.mypage-title-link h2 {
+  margin: 0 0 24px;
+  font-size: 18px;
+  color: #3b2f2a;
+}
+
+.mypage-title-link:visited h2 {
+  color: #3b2f2a;
+}
+
+.mypage-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mypage-nav-item {
+  display: block;
+  text-decoration: none;
+  color: #5f5148;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.mypage-nav-item:hover {
+  background: #f7efe8;
+}
+
+.mypage-nav-item.active {
+  background: #efe3d8;
+  color: #3b2f2a;
+  font-weight: 700;
+}
+
+.mypage-content {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .mypage-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mypage-sidebar {
+    position: static;
+  }
+}

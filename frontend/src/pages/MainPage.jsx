@@ -30,6 +30,11 @@ export default function MainPage() {
       </Link>
       <br />
       <br />
+
+      {/* 마이페이지 */}
+      <Link to="/mypage">
+        <button>마이페이지 보기</button>
+      </Link>
     </div>
   );
 }

@@ -5,6 +5,17 @@ import SkinSurveyResultPage from "@/pages/skin-survey/SkinSurveryResultPage";
 import RecommendationHistoryPage from "@/pages/recommendation/RecommendationHistoryPage";
 import RecommendationResultPage from "@/pages/recommendation/RecommendationResultPage";
 import MainLayout from "@/layouts/MainLayout";
+import SkinDashboard from "@/pages/mypage/SkinDashboard";
+import MyPageLayout from "@/pages/mypage/MyPageLayout";
+import ReservationPage from "@/pages/mypage/ReservationPage";
+import DiagnosisPage from "@/pages/mypage/DiagnosisPage";
+import RecommendationPage from "@/pages/mypage/RecommendationPage";
+import PaymentPage from "@/pages/mypage/PaymentPage";
+import ConsultationPage from "@/pages/mypage/ConsultationPage";
+import ProcedureRecordPage from "@/pages/mypage/ProcedureRecordPage";
+import NotificationPage from "@/pages/mypage/NotificationPage";
+import ProfileEditPage from "@/pages/mypage/ProfileEditPage";
+import WithdrawPage from "@/pages/mypage/WithdrawPage";
 
 const router = createBrowserRouter([
   // 1. 홈/랜딩 페이지
@@ -40,6 +51,23 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <MainPage /> },
       { path: "skin-survey", element: <SkinSurveyPage /> },
+    ],
+  },
+  {
+    // 마이페이지
+    path: "/mypage",
+    element: <MyPageLayout />,
+    children: [
+      { index: true, element: <SkinDashboard /> },
+      { path: "reservations", element: <ReservationPage /> },
+      { path: "diagnosis", element: <DiagnosisPage /> },
+      { path: "recommendations", element: <RecommendationPage /> },
+      { path: "payments", element: <PaymentPage /> },
+      { path: "consultations", element: <ConsultationPage /> },
+      { path: "records", element: <ProcedureRecordPage /> },
+      { path: "notifications", element: <NotificationPage /> },
+      { path: "profile-edit", element: <ProfileEditPage /> },
+      { path: "withdraw", element: <WithdrawPage /> },
     ],
   },
 ]);

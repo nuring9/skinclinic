@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createSkinSurvey } from "@/api/skinSurveyApi";
 import {
   answerOptions,
+  skinAreas,
   skinConcerns,
   skinTypes,
   surveyQuestions,
@@ -12,6 +13,7 @@ import "./skin-survey.css";
 export default function SkinSurveyPage() {
   const [skinType, setSkinType] = useState("");
   const [concerns, setConcerns] = useState([]);
+  const [selectedAreas, setSelectedAreas] = useState([]);
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -21,6 +23,14 @@ export default function SkinSurveyPage() {
       prev.includes(concernValue)
         ? prev.filter((item) => item !== concernValue)
         : [...prev, concernValue],
+    );
+  };
+
+  const handleAreaChange = (areaValue) => {
+    setSelectedAreas((prev) =>
+      prev.includes(areaValue)
+        ? prev.filter((item) => item !== areaValue)
+        : [...prev, areaValue],
     );
   };
 
@@ -48,6 +58,7 @@ export default function SkinSurveyPage() {
       const result = await createSkinSurvey({
         skinType,
         concerns,
+        skinAreas: selectedAreas,
         questionAnswers,
       });
       setMessage("설문이 저장되었습니다.");
@@ -69,8 +80,8 @@ export default function SkinSurveyPage() {
             피부 솔루션 찾기
           </h1>
           <p className="survey-hero__desc">
-            피부 타입, 고민, 추가 문진 10문항을 바탕으로 점수를 합산해서 맞춤
-            시술을 추천해드려요.
+            피부 타입, 고민, 부위별 상태, 추가 문진 10문항을 바탕으로 점수를
+            합산해서 맞춤 시술을 추천해드려요.
           </p>
         </div>
         <div className="survey-hero__image">
@@ -160,6 +171,34 @@ export default function SkinSurveyPage() {
             <div className="survey-block">
               <div className="survey-block__top">
                 <span className="survey-step">STEP 03</span>
+                <h3>부위별 피부 상태 확인</h3>
+                <p>고민이 느껴지는 부위를 여러 개 선택할 수 있어요.</p>
+              </div>
+
+              <div className="survey-chip-grid">
+                {skinAreas.map((area) => (
+                  <label
+                    key={area.value}
+                    className={`survey-chip ${
+                      selectedAreas.includes(area.value) ? "active" : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAreas.includes(area.value)}
+                      onChange={() => handleAreaChange(area.value)}
+                    />
+                    <span>{area.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="survey-divider" />
+
+            <div className="survey-block">
+              <div className="survey-block__top">
+                <span className="survey-step">STEP 04</span>
                 <h3>추가 피부 문진</h3>
                 <p>문항별 답변 점수가 누적되어 추천 시술 점수에 반영됩니다.</p>
               </div>

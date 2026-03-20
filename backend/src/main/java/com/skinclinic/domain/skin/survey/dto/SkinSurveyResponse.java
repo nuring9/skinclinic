@@ -3,6 +3,7 @@ package com.skinclinic.domain.skin.survey.dto;
 import com.skinclinic.domain.skin.survey.entity.SkinSurvey;
 import com.skinclinic.domain.skin.survey.enumtype.SkinConcern;
 import com.skinclinic.domain.skin.survey.enumtype.SkinType;
+import com.skinclinic.domain.skin.survey.enumtype.SkinArea;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,6 +18,7 @@ public class SkinSurveyResponse {
     private Long id;
     private SkinType skinType;
     private Set<SkinConcern> concerns;
+    private Set<SkinArea> skinAreas;
     private Map<String, String> questionAnswers;
 
     public static SkinSurveyResponse from(SkinSurvey skinSurvey){
@@ -25,6 +27,7 @@ public class SkinSurveyResponse {
                 .id(skinSurvey.getId())
                 .skinType(skinSurvey.getSkinType())
                 .concerns(skinSurvey.getConcerns())
+                .skinAreas(skinSurvey.getSkinAreas())
                 .questionAnswers(skinSurvey.getQuestionAnswers())
                 .build();
     }

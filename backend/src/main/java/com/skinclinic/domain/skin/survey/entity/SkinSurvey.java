@@ -1,5 +1,6 @@
 package com.skinclinic.domain.skin.survey.entity;
 
+import com.skinclinic.domain.skin.survey.enumtype.SkinArea;
 import com.skinclinic.domain.skin.survey.enumtype.SkinConcern;
 import com.skinclinic.domain.skin.survey.enumtype.SkinType;
 import jakarta.persistence.*;
@@ -8,10 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "skin_survey")
@@ -39,6 +37,15 @@ public class SkinSurvey {
     @Column(name = "concern")
     private Set<SkinConcern> concerns = new HashSet<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "skin_survey_area",
+            joinColumns = @JoinColumn(name = "skin_survey_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "area")
+    private Set<SkinArea> skinAreas = new LinkedHashSet<>();
+
 
     @ElementCollection
     @CollectionTable(
@@ -50,9 +57,15 @@ public class SkinSurvey {
     private Map<String, String> questionAnswers = new LinkedHashMap<>();
 
     @Builder
-    public SkinSurvey(SkinType skinType, Set<SkinConcern> concerns, Map<String, String> questionAnswers){
+    public SkinSurvey(
+            SkinType skinType,
+            Set<SkinConcern> concerns,
+            Set<SkinArea> skinAreas,
+            Map<String, String> questionAnswers
+    ){
         this.skinType = skinType;
         this.concerns = concerns != null ? concerns : new HashSet<>();
+        this.skinAreas = skinAreas != null ? skinAreas : new LinkedHashSet<>();
         this.questionAnswers = questionAnswers != null ? questionAnswers : new LinkedHashMap<>();
     }
 }

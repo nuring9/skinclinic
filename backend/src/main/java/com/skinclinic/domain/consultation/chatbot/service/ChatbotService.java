@@ -17,9 +17,11 @@ public class ChatbotService {
     private final GeminiChatService geminiChatService;
     private final Map<String, Node> nodes = new LinkedHashMap<>();
 
+
     @PostConstruct
     public void init() {
         // 노드 등록
+        // put(키:string , 값:node)
         nodes.put("ROOT", new Node(
                 "ROOT",
                 "기본 상담",

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class SkinSurveyService {
         SkinSurvey skinSurvey = SkinSurvey.builder()
                 .skinType(request.getSkinType())
                 .concerns(request.getConcerns() != null ? request.getConcerns() : new HashSet<>())
+                .skinAreas(request.getSkinAreas() != null ? request.getSkinAreas() : new LinkedHashSet<>())
                 .questionAnswers(request.getQuestionAnswers() != null ? request.getQuestionAnswers() : new LinkedHashMap<>())
                 .build();
 

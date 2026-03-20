@@ -4,6 +4,7 @@ import { getSkinSurvey } from "@/api/skinSurveyApi";
 import {
   getAnswerLabel,
   getQuestionTitle,
+  getSkinAreaLabel,
   getSkinConcernLabel,
   getSkinTypeLabel,
 } from "@/constants/skinSurveyOptions";
@@ -97,7 +98,10 @@ export default function SkinSurveyResultPage() {
             <div>
               <span className="survey-badge">RESULT REPORT</span>
               <h1>피부 진단 결과</h1>
-              <p>입력한 피부 타입, 고민, 추가 문진 답변을 정리했어요.</p>
+              <p>
+                입력한 피부 타입, 고민, 부위별 상태, 추가 문진 답변을
+                정리했어요.
+              </p>
             </div>
             <div className="result-hero__number">
               <span>Survey No.</span>
@@ -105,7 +109,7 @@ export default function SkinSurveyResultPage() {
             </div>
           </div>
 
-          <div className="result-grid">
+          <div className="result-grid result-grid--triple">
             <div className="result-card main">
               <p className="result-card__label">피부 타입</p>
               <h2>{getSkinTypeLabel(result.skinType)}</h2>
@@ -125,6 +129,21 @@ export default function SkinSurveyResultPage() {
                   ))
                 ) : (
                   <p className="result-empty">선택한 고민이 없습니다.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="result-card side">
+              <p className="result-card__label">부위별 피부 고민</p>
+              <div className="result-chip-list">
+                {result.skinAreas?.length > 0 ? (
+                  result.skinAreas.map((area) => (
+                    <span className="result-chip" key={area}>
+                      {getSkinAreaLabel(area)}
+                    </span>
+                  ))
+                ) : (
+                  <p className="result-empty">선택한 부위가 없습니다.</p>
                 )}
               </div>
             </div>
@@ -160,6 +179,10 @@ export default function SkinSurveyResultPage() {
               <div className="summary-box">
                 <span>고민 개수</span>
                 <strong>{result.concerns?.length || 0}개</strong>
+              </div>
+              <div className="summary-box">
+                <span>선택 부위</span>
+                <strong>{result.skinAreas?.length || 0}개</strong>
               </div>
               <div className="summary-box">
                 <span>추가 문항</span>

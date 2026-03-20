@@ -16,6 +16,15 @@ export const skinConcerns = [
   { value: "SEBUM", label: "피지과다" },
 ];
 
+export const skinAreas = [
+  { value: "FOREHEAD", label: "이마" },
+  { value: "CHEEKS", label: "볼" },
+  { value: "NOSE", label: "코" },
+  { value: "CHIN", label: "턱" },
+  { value: "JAWLINE", label: "턱선" },
+  { value: "AROUND_EYES", label: "눈가" },
+];
+
 export const answerOptions = [
   { value: "HIGH", label: "자주 그래요" },
   { value: "MEDIUM", label: "가끔 그래요" },
@@ -80,6 +89,9 @@ export const getSkinTypeLabel = (value) =>
 
 export const getSkinConcernLabel = (value) =>
   skinConcerns.find((concern) => concern.value === value)?.label || value;
+
+export const getSkinAreaLabel = (value) =>
+  skinAreas.find((area) => area.value === value)?.label || value;
 
 export const getQuestionTitle = (code) =>
   surveyQuestions.find((question) => question.code === code)?.title || code;

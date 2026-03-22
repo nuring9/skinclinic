@@ -35,6 +35,11 @@ export default function MainPage() {
       <Link to="/mypage">
         <button>마이페이지 보기</button>
       </Link>
+      <br />
+      <br />
+      <Link to="/admin/notifications">
+        <button>관리자 알림 관리 보기</button>
+      </Link>
     </div>
   );
 }

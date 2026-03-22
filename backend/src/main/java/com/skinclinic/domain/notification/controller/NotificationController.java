@@ -1,0 +1,55 @@
+package com.skinclinic.domain.notification.controller;
+
+import com.skinclinic.domain.notification.dto.NotificationCreateRequest;
+import com.skinclinic.domain.notification.dto.NotificationResponse;
+import com.skinclinic.domain.notification.enumtype.NotificationType;
+import com.skinclinic.domain.notification.service.NotificationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+public class NotificationController {
+    private final NotificationService notificationService;
+
+    @GetMapping("/notifications/users/{userId}")
+    public List<NotificationResponse> getUserNotifications(
+            @PathVariable Long userId,
+            @RequestParam(required = false) NotificationType type
+    ) {
+        return notificationService.getUserNotifications(userId, type);
+    }
+
+    @GetMapping("/notifications/users/{userId}/unread-count")
+    public Map<String, Long> getUnreadCount(@PathVariable Long userId) {
+        return Map.of("unreadCount", notificationService.getUnreadCount(userId));
+    }
+
+    @PatchMapping("/notifications/{notificationId}/read")
+    public NotificationResponse markAsRead(@PathVariable Long notificationId) {
+        return notificationService.markAsRead(notificationId);
+    }
+
+    @PatchMapping("/notifications/{notificationId}/kakao-sent")
+    public NotificationResponse markKakaoSent(@PathVariable Long notificationId) {
+        return notificationService.markKakaoSent(notificationId);
+    }
+
+    @GetMapping("/admin/notifications")
+    public List<NotificationResponse> getAllNotifications(
+            @RequestParam(required = false) NotificationType type
+    ) {
+        return notificationService.getAllNotifications(type);
+    }
+
+    @PostMapping("/admin/notifications")
+    public NotificationResponse createNotification(@RequestBody @Valid NotificationCreateRequest request) {
+        return notificationService.createNotification(request);
+    }
+
+}

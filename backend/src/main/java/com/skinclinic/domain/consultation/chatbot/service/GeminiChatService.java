@@ -47,7 +47,7 @@ public class GeminiChatService {
         - 병원 확정 진단처럼 말하지 말 것
         - 기본 답변을 그대로 복사하지 말 것
         - 마크다운 없이 일반 문장으로만 답할 것
-        """.formatted(topic, defaultAnswer);
+        """.formatted(topic, defaultAnswer); // 여기 첫번째 %s가 topic ,두번째 %s가 기본답변
 
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(Map.of(

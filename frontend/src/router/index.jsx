@@ -16,6 +16,7 @@ import ProcedureRecordPage from "@/pages/mypage/ProcedureRecordPage";
 import NotificationPage from "@/pages/mypage/NotificationPage";
 import ProfileEditPage from "@/pages/mypage/ProfileEditPage";
 import WithdrawPage from "@/pages/mypage/WithdrawPage";
+import AdminNotificationPage from "@/pages/admin/AdminNotificationPage";
 
 const router = createBrowserRouter([
   // 1. 홈/랜딩 페이지
@@ -45,7 +46,12 @@ const router = createBrowserRouter([
     element: <RecommendationResultPage />,
   },
   {
-    // 6. 챗봇
+    // 6. 관리자
+    path: "/admin/notifications",
+    element: <AdminNotificationPage />,
+  },
+  {
+    // 7. 챗봇
     path: "/",
     element: <MainLayout />,
     children: [

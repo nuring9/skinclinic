@@ -1,10 +1,18 @@
 package com.skinclinic.domain.consultation.chatbot.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import org.springframework.util.StringUtils;
 
 @Getter
 public class ChatbotMessageRequest {
-    @NotBlank // 공백이면 안된다. 잘못된 요청을 보냈을때 빈 값으로 로직이 돌지 않게 막아줌.
     private String optionCode;  // 사용자가 누른 버튼의 코드 값.
+    private String message;  // 사용자가 직접 입력한 상담 내용.
+
+    public boolean hasOptionCode() {
+        return StringUtils.hasText(optionCode);
+    }
+
+    public boolean hasMessage() {
+        return StringUtils.hasText(message);
+    }
 }

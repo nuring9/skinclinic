@@ -5,7 +5,17 @@ export const getChatbotWelcome = async () => {
   return response.data;
 };
 
-export const sendChatbotMessage = async (optionCode) => {
-  const response = await api.post("/api/chatbot/messages", { optionCode });
+export const sendChatbotMessage = async ({ optionCode, message }) => {
+  const payload = {};
+
+  if (optionCode) {
+    payload.optionCode = optionCode;
+  }
+
+  if (message) {
+    payload.message = message;
+  }
+
+  const response = await api.post("/api/chatbot/messages", payload);
   return response.data;
 };

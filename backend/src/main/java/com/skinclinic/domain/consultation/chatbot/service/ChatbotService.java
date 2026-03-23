@@ -1,10 +1,12 @@
 package com.skinclinic.domain.consultation.chatbot.service;
 
+import com.skinclinic.domain.consultation.chatbot.dto.ChatbotMessageRequest;
 import com.skinclinic.domain.consultation.chatbot.dto.ChatbotOptionDto;
 import com.skinclinic.domain.consultation.chatbot.dto.ChatbotResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,9 +229,27 @@ public class ChatbotService {
         return toResponse(node, node.answer(), false);
     }
 
-    // 사용자 선택에 따른 답변 (ai 강화 로직 포함)
-    public ChatbotResponse reply(String optionCode) {
+    // 버튼 선택 또는 직접 입력에 따른 답변
+    public ChatbotResponse reply(ChatbotMessageRequest request) {
+        if (request.hasOptionCode()) {
+            return replyByOption(request.getOptionCode());
+        }
+
+        return replyByMessage(request.getMessage());
+    }
+
+    private ChatbotResponse replyByOption(String optionCode) {
         Node node = nodes.get(optionCode);
+
+        if (node == null) {
+            return buildFreeformResponse(
+                    "상담 안내",
+                    "선택하신 상담 항목을 다시 확인해주세요. 필요하시면 아래 입력창에 궁금한 내용을 직접 남겨주셔도 돼요.",
+                    false,
+                    true,
+                    List.of("ROOT", "HUMAN_COUNSEL")
+            );
+        }
 
         String answer = node.answer();
         boolean aiEnhanced = false;
@@ -247,18 +267,31 @@ public class ChatbotService {
         return toResponse(node, answer, aiEnhanced);
     }
 
+    private ChatbotResponse replyByMessage(String message) {
+        String trimmedMessage = message == null ? "" : message.trim();
+        List<String> nextCodes = inferNextCodes(trimmedMessage);
+        boolean handoffRecommended = shouldRecommendHandoff(trimmedMessage);
+
+        String fallbackAnswer = """
+                입력해주신 내용을 바탕으로 보면 현재 고민에 맞는 관리 방향이나 예약 안내를 함께 확인해보는 것이 좋아요.
+                증상 정도나 최근 시술 여부에 따라 안내가 달라질 수 있어서, 자세한 상태 확인이 필요하면 관리자 1:1 상담으로 이어드리는 편이 더 정확해요.
+                """.trim();
+
+        GeminiChatService.GeminiResult result =
+                geminiChatService.answerFreeform(trimmedMessage, fallbackAnswer);
+
+        return buildFreeformResponse(
+                "상담 답변",
+                result.answer(),
+                result.enhanced(),
+                handoffRecommended,
+                nextCodes
+        );
+    }
+
     // DTO 변환
     private ChatbotResponse toResponse(Node node, String answer, boolean aiEnhanced) {
-        List<ChatbotOptionDto> options = node.nextCodes().stream()
-               // .map(code -> nodes.get(code))
-                .map(nodes::get) // 메서드 참조로 깔끔하게 변경 가능.
-                .filter(java.util.Objects::nonNull) // 등록되지 않은 코드가 있을 경우를 대비한 방어 코드
-                .map(next -> ChatbotOptionDto.builder()
-                        .code(next.code())
-                        .label(next.label())
-                        .description(next.leaf() ? "선택 후 답변 보기" : "하위 메뉴 열기")
-                        .build())
-        .toList();
+        List<ChatbotOptionDto> options = toOptions(node.nextCodes());
 
         return ChatbotResponse.builder()
                 .optionCode(node.code())
@@ -269,6 +302,89 @@ public class ChatbotService {
                 .handoffRecommended(node.handoffRecommended())
                 .suggestedOptions(options)
                 .build();
+    }
+
+    private ChatbotResponse buildFreeformResponse(
+            String title,
+            String answer,
+            boolean aiEnhanced,
+            boolean handoffRecommended,
+            List<String> nextCodes
+    ) {
+        return ChatbotResponse.builder()
+                .optionCode("FREEFORM")
+                .optionLabel(title)
+                .answerTitle(title)
+                .answerBody(answer)
+                .aiEnhanced(aiEnhanced)
+                .handoffRecommended(handoffRecommended)
+                .suggestedOptions(toOptions(nextCodes))
+                .build();
+    }
+
+    private List<ChatbotOptionDto> toOptions(List<String> nextCodes) {
+        return nextCodes.stream()
+                .map(nodes::get)
+                .filter(java.util.Objects::nonNull)
+                .map(next -> ChatbotOptionDto.builder()
+                        .code(next.code())
+                        .label(next.label())
+                        .description(next.leaf() ? "선택 후 답변 보기" : "하위 메뉴 열기")
+                        .build())
+                .toList();
+    }
+
+    private List<String> inferNextCodes(String message) {
+        String normalized = message.toLowerCase();
+
+        if (containsAny(normalized, "여드름", "트러블", "뾰루지")) {
+            return List.of("CONCERN_ACNE", "PROCEDURE_ACNE", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "기미", "잡티", "색소", "톤", "미백")) {
+            return List.of("CONCERN_PIGMENT", "PROCEDURE_TONING", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "모공", "피지", "블랙헤드")) {
+            return List.of("CONCERN_PORE", "PROCEDURE_PORE", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "홍조", "붉", "민감", "진정")) {
+            return List.of("CONCERN_REDNESS", "PROCEDURE_SOOTHING", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "예약", "날짜", "시간", "변경", "취소")) {
+            return List.of("BOOKING_GUIDE", "BOOKING_CHANGE", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "가격", "비용", "얼마", "결제")) {
+            return List.of("FAQ_PRICE", "BOOKING_PAYMENT", "HUMAN_COUNSEL");
+        }
+
+        if (containsAny(normalized, "회복", "붉은기", "붓기", "after", "애프터")) {
+            return List.of("FAQ_RECOVERY", "FAQ_AFTERCARE", "HUMAN_COUNSEL");
+        }
+
+        return List.of("SKIN_CONCERN", "PROCEDURE_INFO", "BOOKING_GUIDE", "HUMAN_COUNSEL");
+    }
+
+    private boolean shouldRecommendHandoff(String message) {
+        String normalized = message.toLowerCase();
+
+        return containsAny(
+                normalized,
+                "심해", "악화", "아프", "통증", "붓", "화끈", "알러지", "부작용",
+                "예약 변경", "예약취소", "취소", "결제", "가격", "비용", "진료", "상담"
+        );
+    }
+
+    private boolean containsAny(String value, String... keywords) {
+        for (String keyword : keywords) {
+            if (value.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

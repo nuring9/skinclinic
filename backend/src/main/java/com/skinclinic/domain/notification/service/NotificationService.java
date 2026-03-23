@@ -1,129 +1,298 @@
 package com.skinclinic.domain.notification.service;
 
-import com.skinclinic.domain.notification.dto.NotificationCreateRequest;
-import com.skinclinic.domain.notification.dto.NotificationResponse;
-import com.skinclinic.domain.notification.enumtype.NotificationType;
+import com.skinclinic.domain.notification.dto.*;
+import com.skinclinic.domain.notification.entity.NotificationAttempt;
+import com.skinclinic.domain.notification.entity.NotificationHistory;
+import com.skinclinic.domain.notification.enumtype.*;
+import com.skinclinic.domain.notification.gateway.KakaoMessageSender;
+import com.skinclinic.domain.notification.gateway.KakaoTokenRefresher;
+import com.skinclinic.domain.notification.gateway.SmsSender;
+import com.skinclinic.domain.notification.port.MemberNotificationReader;
+import com.skinclinic.domain.notification.port.NotificationMemberInfo;
+import com.skinclinic.domain.notification.repository.NotificationHistoryRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
-    private final List<NotificationResponse> notifications = new ArrayList<>();
-    private long sequence = 1L;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+    private final MemberNotificationReader memberNotificationReader;
+    private final SmsSender smsSender;
+    private final KakaoMessageSender kakaoMessageSender;
+    private final KakaoTokenRefresher kakaoTokenRefresher;
 
     @PostConstruct
     void initDummyData() {
-        notifications.add(new NotificationResponse(
-                sequence++,
+        if (notificationHistoryRepository.count() > 0) {
+            return;
+        }
+
+        triggerNotificationEvent(new NotificationEventTriggerRequest(
                 1L,
                 NotificationType.RESERVATION,
-                "예약 완료",
-                "3월 25일 14:00 예약이 확정되었습니다.",
-                false,
-                true,
-                false,
-                LocalDateTime.of(2026, 3, 19, 9, 0)
-        ));
-
-        notifications.add(new NotificationResponse(
-                sequence++,
-                1L,
-                NotificationType.PAYMENT,
-                "결제 완료",
-                "LDM 물방울 리프팅 결제가 완료되었습니다.",
-                false,
-                true,
-                false,
-                LocalDateTime.of(2026, 3, 19, 10, 12)
-        ));
-
-        notifications.add(new NotificationResponse(
-                sequence++,
-                1L,
-                NotificationType.CONSULTATION,
-                "상담 답변 도착",
-                "문의하신 내용에 관리자 답변이 등록되었습니다.",
-                true,
-                false,
-                false,
-                LocalDateTime.of(2026, 3, 18, 16, 20)
+                null,
+                null,
+                "2026-03-25 14:00 예약 확정"
         ));
     }
 
-    public List<NotificationResponse> getUserNotifications(Long userId, NotificationType type){
-        return notifications.stream()
-                .filter(item -> item.userId().equals(userId))
-                .filter(item -> type == null || item.type() == type)
-                .sorted(Comparator.comparing(NotificationResponse::createdAt).reversed())
+    public List<NotificationResponse> getUserNotifications(Long userId, NotificationType type) {
+        List<NotificationHistory> histories = type == null
+                ? notificationHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                : notificationHistoryRepository.findByUserIdAndTypeOrderByCreatedAtDesc(userId, type);
+
+        return histories.stream()
+                .map(NotificationHistory::toResponse)
                 .toList();
     }
 
-    public long getUnreadCount(Long userId){
-        return notifications.stream()
-                .filter(item -> item.userId().equals(userId))
-                .filter(item -> item.read())
-                .count();
+    public long getUnreadCount(Long userId) {
+        return notificationHistoryRepository.countByUserIdAndIsReadFalse(userId);
     }
 
     public NotificationResponse createNotification(NotificationCreateRequest request) {
-        NotificationResponse newNotification = new NotificationResponse(
-                sequence++,
+        NotificationMemberInfo member = getMemberOrThrow(request.userId());
+
+        NotificationHistory history = new NotificationHistory(
                 request.userId(),
+                member.memberName(),
+                member.memberType(),
                 request.type(),
                 request.title(),
                 request.message(),
-                false,
-                request.kakaoShareAvailable(),
-                false,
-                LocalDateTime.now()
+                request.kakaoShareAvailable() && member.canSendKakaoMemo()
         );
 
-        notifications.add(newNotification);
-        return newNotification;
+        history.setDeliverySummary("관리자 수동 생성 알림");
+        return notificationHistoryRepository.save(history).toResponse();
     }
 
-    public NotificationResponse markAsRead(Long notificationId){
-        return updateNotification(notificationId, true, null);
+    public NotificationResponse triggerNotificationEvent(NotificationEventTriggerRequest request) {
+        NotificationMemberInfo member = getMemberOrThrow(request.userId());
+
+        NotificationHistory history = new NotificationHistory(
+                member.memberId(),
+                member.memberName(),
+                member.memberType(),
+                request.type(),
+                buildTitle(request, member),
+                buildMessage(request, member),
+                member.canSendKakaoMemo()
+        );
+
+        dispatch(history, member);
+        return notificationHistoryRepository.save(history).toResponse();
     }
 
-    public NotificationResponse markKakaoSent(Long notificationId){
-        return  updateNotification(notificationId, null, true);
+    public NotificationResponse markAsRead(Long notificationId) {
+        NotificationHistory history = getHistoryOrThrow(notificationId);
+        history.markAsRead();
+        return notificationHistoryRepository.save(history).toResponse();
+    }
+
+    public NotificationResponse markKakaoSent(Long notificationId) {
+        NotificationHistory history = getHistoryOrThrow(notificationId);
+
+        history.addAttempt(new NotificationAttempt(
+                history.nextAttemptSequence(),
+                DeliveryChannel.KAKAO_MEMO,
+                DeliveryStatus.SUCCESS,
+                FailureReason.NONE,
+                "프론트 데모 수동 카카오 수신 처리",
+                LocalDateTime.now()
+        ));
+        history.markKakaoSentManually();
+
+        return notificationHistoryRepository.save(history).toResponse();
     }
 
     public List<NotificationResponse> getAllNotifications(NotificationType type) {
-        return notifications.stream()
-                .filter(item -> type == null || item.type() == type)
-                .sorted(Comparator.comparing(NotificationResponse::createdAt).reversed())
+        List<NotificationHistory> histories = type == null
+                ? notificationHistoryRepository.findAll()
+                : notificationHistoryRepository.findByTypeOrderByCreatedAtDesc(type);
+
+        return histories.stream()
+                .sorted(Comparator.comparing(NotificationHistory::getCreatedAt).reversed())
+                .map(NotificationHistory::toResponse)
                 .toList();
     }
 
-    private NotificationResponse updateNotification(Long notificationId, Boolean read, Boolean kakaoSent) {
-        for (int i = 0; i < notifications.size(); i++) {
-            NotificationResponse current = notifications.get(i);
+    public List<NotificationMemberResponse> getNotificationMembers() {
+        return memberNotificationReader.findAll().stream()
+                .sorted(Comparator.comparing(NotificationMemberInfo::memberId))
+                .map(member -> new NotificationMemberResponse(
+                        member.memberId(),
+                        member.memberName(),
+                        member.memberType(),
+                        member.phone(),
+                        member.kakaoLogin(),
+                        member.talkMessageAgreed(),
+                        member.hasAccessToken(),
+                        member.hasRefreshToken(),
+                        member.demoScenario()
+                ))
+                .toList();
+    }
 
-            if (current.id().equals(notificationId)) {
-                NotificationResponse updated = new NotificationResponse(
-                        current.id(),
-                        current.userId(),
-                        current.type(),
-                        current.title(),
-                        current.message(),
-                        read != null ? read : current.read(),
-                        current.kakaoShareAvailable(),
-                        kakaoSent != null ? kakaoSent : current.kakaoSent(),
-                        current.createdAt()
-                );
-                notifications.set(i, updated);
-                return updated;
-            }
+    private void dispatch(NotificationHistory history, NotificationMemberInfo member) {
+        if (member.canSendKakaoMemo()) {
+            sendKakaoWithRetryAndFallback(history, member);
+            return;
         }
 
-        throw new IllegalArgumentException("해당 알림을 찾을 수 없습니다. id=" + notificationId);
+        sendSms(history, member, false, "일반회원 SMS 자동 발송");
+    }
+
+    private void sendKakaoWithRetryAndFallback(NotificationHistory history, NotificationMemberInfo member) {
+        KakaoMessageSender.KakaoSendResult firstTry =
+                kakaoMessageSender.sendToMe(member, history.getTitle(), history.getMessage());
+
+        history.addAttempt(new NotificationAttempt(
+                history.nextAttemptSequence(),
+                DeliveryChannel.KAKAO_MEMO,
+                firstTry.success() ? DeliveryStatus.SUCCESS : DeliveryStatus.FAILED,
+                firstTry.failureReason(),
+                "1차 카카오 발송: " + firstTry.detail(),
+                LocalDateTime.now()
+        ));
+
+        if (firstTry.success()) {
+            history.setDeliverySummary("카카오 나에게 메시지 보내기 성공");
+            return;
+        }
+
+        if (isRetryable(firstTry.failureReason()) && member.hasRefreshToken()) {
+            KakaoTokenRefresher.KakaoTokenRefreshResult refreshResult = kakaoTokenRefresher.refresh(member);
+
+            if (refreshResult.success()) {
+                NotificationMemberInfo refreshedMember =
+                        member.withNewAccessToken(refreshResult.newAccessToken(), refreshResult.newExpiresAt());
+
+                history.addAttempt(new NotificationAttempt(
+                        history.nextAttemptSequence(),
+                        DeliveryChannel.KAKAO_MEMO,
+                        DeliveryStatus.SUCCESS,
+                        FailureReason.NONE,
+                        "access token 재발급 성공: " + refreshResult.detail(),
+                        LocalDateTime.now()
+                ));
+
+                KakaoMessageSender.KakaoSendResult retryTry =
+                        kakaoMessageSender.sendToMe(refreshedMember, history.getTitle(), history.getMessage());
+
+                history.addAttempt(new NotificationAttempt(
+                        history.nextAttemptSequence(),
+                        DeliveryChannel.KAKAO_MEMO,
+                        retryTry.success() ? DeliveryStatus.SUCCESS : DeliveryStatus.FAILED,
+                        retryTry.failureReason(),
+                        "2차 카카오 재시도: " + retryTry.detail(),
+                        LocalDateTime.now()
+                ));
+
+                if (retryTry.success()) {
+                    history.setDeliverySummary("카카오 토큰 재발급 후 재시도 성공");
+                    return;
+                }
+
+                sendSms(history, member, true, "카카오 재시도 실패 후 SMS fallback");
+                return;
+            }
+
+            history.addAttempt(new NotificationAttempt(
+                    history.nextAttemptSequence(),
+                    DeliveryChannel.KAKAO_MEMO,
+                    DeliveryStatus.FAILED,
+                    FailureReason.AUTH_ERROR,
+                    "access token 재발급 실패: " + refreshResult.detail(),
+                    LocalDateTime.now()
+            ));
+
+            sendSms(history, member, true, "카카오 토큰 재발급 실패 후 SMS fallback");
+            return;
+        }
+
+        sendSms(history, member, true, "카카오 발송 실패 후 SMS fallback");
+    }
+
+    private void sendSms(
+            NotificationHistory history,
+            NotificationMemberInfo member,
+            boolean fallback,
+            String summary
+    ) {
+        if (!member.hasPhone()) {
+            history.addAttempt(new NotificationAttempt(
+                    history.nextAttemptSequence(),
+                    DeliveryChannel.SMS,
+                    DeliveryStatus.FAILED,
+                    FailureReason.NO_PHONE_NUMBER,
+                    "휴대폰 번호가 없어 SMS 발송 불가",
+                    LocalDateTime.now()
+            ));
+            history.setDeliverySummary("SMS 발송 실패: 휴대폰 번호 없음");
+            return;
+        }
+
+        SmsSender.SmsSendResult result = smsSender.send(member.phone(), history.getTitle(), history.getMessage());
+
+        history.addAttempt(new NotificationAttempt(
+                history.nextAttemptSequence(),
+                DeliveryChannel.SMS,
+                result.success() ? (fallback ? DeliveryStatus.FALLBACK_SUCCESS : DeliveryStatus.SUCCESS) : DeliveryStatus.FAILED,
+                result.success() ? FailureReason.NONE : FailureReason.UNKNOWN,
+                result.detail(),
+                LocalDateTime.now()
+        ));
+
+        history.setDeliverySummary(result.success() ? summary + " 성공" : summary + " 실패");
+    }
+
+    private boolean isRetryable(FailureReason failureReason) {
+        return failureReason == FailureReason.TOKEN_EXPIRED || failureReason == FailureReason.AUTH_ERROR;
+    }
+
+    private NotificationMemberInfo getMemberOrThrow(Long memberId) {
+        return memberNotificationReader.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다. memberId=" + memberId));
+    }
+
+    private NotificationHistory getHistoryOrThrow(Long notificationId) {
+        return notificationHistoryRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 알림을 찾을 수 없습니다. id=" + notificationId));
+    }
+
+    private String buildTitle(NotificationEventTriggerRequest request, NotificationMemberInfo member) {
+        if (request.title() != null && !request.title().isBlank()) {
+            return request.title();
+        }
+
+        return switch (request.type()) {
+            case RESERVATION -> member.memberName() + "님 예약 안내";
+            case PAYMENT -> member.memberName() + "님 결제 완료 안내";
+            case CONSULTATION -> member.memberName() + "님 1:1 상담 안내";
+        };
+    }
+
+    private String buildMessage(NotificationEventTriggerRequest request, NotificationMemberInfo member) {
+        if (request.message() != null && !request.message().isBlank()) {
+            return request.message();
+        }
+
+        String reference = request.eventReference() == null || request.eventReference().isBlank()
+                ? "상세 정보는 마이페이지에서 확인해주세요."
+                : request.eventReference();
+
+        return switch (request.type()) {
+            case RESERVATION -> member.memberName() + "님의 예약 이벤트가 발생했습니다. " + reference;
+            case PAYMENT -> member.memberName() + "님의 결제 이벤트가 발생했습니다. " + reference;
+            case CONSULTATION -> member.memberName() + "님의 1:1 상담 이벤트가 발생했습니다. " + reference;
+        };
     }
 }

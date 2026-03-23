@@ -15,13 +15,13 @@ export const getUnreadNotificationCount = async (userId) => {
 };
 
 export const markNotificationAsRead = async (notificationId) => {
-  const response = await api.patch(`/api/notifications/${notificationId}/read`); // 데이터의 일부분만 수정할 때 patch
+  const response = await api.patch(`/api/notifications/${notificationId}/read`);
   return response.data;
 };
 
 export const markNotificationAsKakaoSent = async (notificationId) => {
   const response = await api.patch(
-    `/api/notifications/${notificationId}/kakao-sent`, // 글자 수가 길어서 쉼표가 생김.
+    `/api/notifications/${notificationId}/kakao-sent`,
   );
   return response.data;
 };
@@ -33,7 +33,17 @@ export const getAllNotifications = async (type = "ALL") => {
   return response.data;
 };
 
+export const getNotificationMembers = async () => {
+  const response = await api.get("/api/admin/notifications/members");
+  return response.data;
+};
+
 export const createNotification = async (payload) => {
   const response = await api.post("/api/admin/notifications", payload);
+  return response.data;
+};
+
+export const triggerNotificationEvent = async (payload) => {
+  const response = await api.post("/api/admin/notifications/events", payload);
   return response.data;
 };

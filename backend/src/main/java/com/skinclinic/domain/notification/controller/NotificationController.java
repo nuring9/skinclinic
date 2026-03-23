@@ -1,6 +1,8 @@
 package com.skinclinic.domain.notification.controller;
 
 import com.skinclinic.domain.notification.dto.NotificationCreateRequest;
+import com.skinclinic.domain.notification.dto.NotificationEventTriggerRequest;
+import com.skinclinic.domain.notification.dto.NotificationMemberResponse;
 import com.skinclinic.domain.notification.dto.NotificationResponse;
 import com.skinclinic.domain.notification.enumtype.NotificationType;
 import com.skinclinic.domain.notification.service.NotificationService;
@@ -15,6 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class NotificationController {
+
     private final NotificationService notificationService;
 
     @GetMapping("/notifications/users/{userId}")
@@ -47,9 +50,18 @@ public class NotificationController {
         return notificationService.getAllNotifications(type);
     }
 
+    @GetMapping("/admin/notifications/members")
+    public List<NotificationMemberResponse> getNotificationMembers() {
+        return notificationService.getNotificationMembers();
+    }
+
     @PostMapping("/admin/notifications")
     public NotificationResponse createNotification(@RequestBody @Valid NotificationCreateRequest request) {
         return notificationService.createNotification(request);
     }
 
+    @PostMapping("/admin/notifications/events")
+    public NotificationResponse triggerNotificationEvent(@RequestBody @Valid NotificationEventTriggerRequest request) {
+        return notificationService.triggerNotificationEvent(request);
+    }
 }

@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/utils/date";
 import "./mypagesection.css";
 
 const mockReservations = [
@@ -26,7 +27,7 @@ export default function ReservationPage() {
           <div key={item.id} className="mypage-section-item">
             <strong>{item.procedureName}</strong>
             <p>
-              예약 일시: {item.date} {item.time}
+              예약 일시: {formatDateTime(`${item.date} ${item.time}`)}
             </p>
             <p>상태: {item.status}</p>
           </div>

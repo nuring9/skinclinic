@@ -5,6 +5,7 @@ import {
   getSkinConcernLabel,
   getSkinTypeLabel,
 } from "@/constants/skinSurveyOptions";
+import { formatDateTime } from "@/utils/date";
 import "./skindashboard.css";
 
 // 사용자 기본 정보
@@ -201,7 +202,7 @@ export default function SkinDashboard() {
               <div key={item.id} className="skin-dashboard-list-item">
                 <strong>{item.procedureName}</strong>
                 <p>
-                  {item.date} {item.time}
+                  {formatDateTime(`${item.date} ${item.time}`)}
                 </p>
                 <p>{item.status}</p>
               </div>
@@ -216,9 +217,7 @@ export default function SkinDashboard() {
               <div key={item.id} className="skin-dashboard-list-item">
                 <strong>{item.procedureName}</strong>
                 <p>{item.amount.toLocaleString()}원</p>
-                <p>
-                  {item.status} / {item.paidAt}
-                </p>
+                <p>{item.status} / {formatDateTime(item.paidAt)}</p>
               </div>
             ))}
           </div>
@@ -231,7 +230,7 @@ export default function SkinDashboard() {
               <div key={item.id} className="skin-dashboard-list-item">
                 <strong>{item.title}</strong>
                 <p>{item.lastMessage}</p>
-                <p>{item.updatedAt}</p>
+                <p>{formatDateTime(item.updatedAt)}</p>
               </div>
             ))}
           </div>
@@ -243,7 +242,7 @@ export default function SkinDashboard() {
             {mockRecords.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
                 <strong>{item.procedureName}</strong>
-                <p>시술일: {item.treatedAt}</p>
+                <p>시술일: {formatDateTime(item.treatedAt)}</p>
                 <p>
                   {item.beforeImage} / {item.afterImage}
                 </p>
@@ -259,7 +258,7 @@ export default function SkinDashboard() {
               <div key={item.id} className="skin-dashboard-list-item">
                 <strong>[{item.type}]</strong>
                 <p>{item.message}</p>
-                <p>{item.createdAt}</p>
+                <p>{formatDateTime(item.createdAt)}</p>
               </div>
             ))}
           </div>

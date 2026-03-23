@@ -6,6 +6,7 @@ import {
   getRecommendationHistoriesByUser,
 } from "@/api/recommendationApi";
 import { skinTypes, skinConcerns } from "@/constants/skinSurveyOptions";
+import { formatDateTime } from "@/utils/date";
 import "./recommendation.css";
 
 export default function RecommendationHistoryPage() {
@@ -210,11 +211,7 @@ export default function RecommendationHistoryPage() {
                           .join(", ")}
                       </p>
                     </div>
-                    <span>
-                      {history.createdAt
-                        ? new Date(history.createdAt).toLocaleString()
-                        : ""}
-                    </span>
+                    <span>{formatDateTime(history.createdAt)}</span>
                   </div>
                 ))}
               </div>

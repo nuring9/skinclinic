@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { formatDateTime } from "@/utils/date";
 import {
   getAllNotifications,
   getNotificationMembers,
@@ -175,6 +177,13 @@ export default function AdminNotificationPage() {
             <span>알림 이력</span>
             <strong>{selectedHistory.length}건</strong>
           </div>
+          <Link
+            to="/admin/procedure-satisfaction"
+            className="notification-read-button"
+            style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}
+          >
+            만족도 통계 보기
+          </Link>
         </div>
       </div>
 
@@ -347,7 +356,7 @@ export default function AdminNotificationPage() {
               <p>{item.message}</p>
               <div className="admin-history-meta">
                 <span>요약: {item.deliverySummary}</span>
-                <span>생성일: {item.createdAt.replace("T", " ")}</span>
+                <span>생성일: {formatDateTime(item.createdAt)}</span>
               </div>
               <div className="admin-attempt-list">
                 {item.attempts?.map((attempt) => (

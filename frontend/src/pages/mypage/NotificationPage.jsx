@@ -4,6 +4,7 @@ import {
   getUserNotifications,
   markNotificationAsRead,
 } from "@/api/notificationApi";
+import { formatDateTime } from "@/utils/date";
 import "./mypagesection.css";
 
 const CURRENT_USER_ID = 1;
@@ -83,7 +84,7 @@ export default function NotificationPage() {
             <p>{item.message}</p>
 
             <div className="notification-item-bottom">
-              <span>{item.createdAt.replace("T", " ")}</span>
+              <span>{formatDateTime(item.createdAt)}</span>
 
               <div className="notification-action-row">
                 {!item.read && (

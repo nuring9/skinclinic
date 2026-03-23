@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/utils/date";
 import "./mypagesection.css";
 
 const mockConsultations = [
@@ -24,7 +25,7 @@ export default function ConsultationPage() {
           <div key={item.id} className="mypage-section-item">
             <strong>{item.title}</strong>
             <p>{item.message}</p>
-            <p>최근 업데이트: {item.updatedAt}</p>
+            <p>최근 업데이트: {formatDateTime(item.updatedAt)}</p>
           </div>
         ))}
       </div>

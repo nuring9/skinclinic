@@ -8,7 +8,7 @@ const MENU_ITEMS = [
   { to: "/mypage/recommendations", label: "맞춤 추천" },
   { to: "/mypage/payments", label: "결제 내역" },
   { to: "/mypage/consultations", label: "상담 내역" },
-  { to: "/mypage/records", label: "시술 기록" },
+  { to: "/mypage/records", label: "시술 기록 / 만족도 평가" },
   { to: "/mypage/notifications", label: "알림 내역" },
   { to: "/mypage/profile-edit", label: "회원정보 수정" },
   { to: "/mypage/withdraw", label: "회원탈퇴" },

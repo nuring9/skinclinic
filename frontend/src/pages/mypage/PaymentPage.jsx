@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/utils/date";
 import "./mypagesection.css";
 
 const mockPayments = [
@@ -26,7 +27,7 @@ export default function PaymentPage() {
           <div key={item.id} className="mypage-section-item">
             <strong>{item.procedureName}</strong>
             <p>결제 금액: {item.amount}</p>
-            <p>결제일: {item.paidAt}</p>
+            <p>결제일: {formatDateTime(item.paidAt)}</p>
             <p>상태: {item.status}</p>
           </div>
         ))}

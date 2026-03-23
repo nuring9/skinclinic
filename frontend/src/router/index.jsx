@@ -17,6 +17,7 @@ import NotificationPage from "@/pages/mypage/NotificationPage";
 import ProfileEditPage from "@/pages/mypage/ProfileEditPage";
 import WithdrawPage from "@/pages/mypage/WithdrawPage";
 import AdminNotificationPage from "@/pages/admin/AdminNotificationPage";
+import AdminProcedureSatisfactionPage from "@/pages/admin/AdminProcedureSatisfactionPage";
 
 const router = createBrowserRouter([
   // 1. 홈/랜딩 페이지
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
     // 6. 관리자
     path: "/admin/notifications",
     element: <AdminNotificationPage />,
+  },
+  {
+    path: "/admin/procedure-satisfaction",
+    element: <AdminProcedureSatisfactionPage />,
   },
   {
     // 7. 챗봇

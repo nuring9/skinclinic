@@ -37,8 +37,18 @@ export default function MainPage() {
       </Link>
       <br />
       <br />
+      <Link to="/mypage/records">
+        <button>시술 만족도 평가하러 가기</button>
+      </Link>
+      <br />
+      <br />
       <Link to="/admin/notifications">
         <button>관리자 알림 관리 보기</button>
+      </Link>
+      <br />
+      <br />
+      <Link to="/admin/procedure-satisfaction">
+        <button>관리자 만족도 통계 보기</button>
       </Link>
     </div>
   );

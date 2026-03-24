@@ -5,6 +5,7 @@ import {
 } from "@/api/procedureReviewApi";
 import { formatDateTime } from "@/utils/date";
 import "@/pages/mypage/mypagesection.css";
+import "./admin-procedure.css";
 
 const CHART_COLORS = ["#8e4e31", "#d18352", "#d9ad7c", "#7c9aa5", "#b76e4d"];
 const REVIEW_PAGE_SIZE = 5;

@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
-import { getSkinSurvey } from "@/api/skinSurveyApi";
+import { getLatestSkinSurveyByUser } from "@/api/skinSurveyApi";
 import { getRecommendationHistoriesByUser } from "@/api/recommendationApi";
+import { getMyMemberInfo } from "@/api/memberApi";
 import {
   getSkinConcernLabel,
   getSkinTypeLabel,
 } from "@/constants/skinSurveyOptions";
 import { formatDateTime } from "@/utils/date";
 import "./skindashboard.css";
-
-// 사용자 기본 정보
-const MOCK_USER = {
-  id: 1,
-  name: "박누리",
-};
 
 // 예약 현황
 // 시술명(LDM 리프팅 등), 날짜, 시간, 현재 상태(확정/완료).
@@ -86,6 +81,7 @@ const mockNotifications = [
 ];
 
 export default function SkinDashboard() {
+  const [member, setMember] = useState(null);
   const [survey, setSurvey] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,14 +91,17 @@ export default function SkinDashboard() {
       setLoading(true);
 
       try {
-        const surveyData = await getSkinSurvey(1).catch(() => {
+        const memberData = await getMyMemberInfo();
+        setMember(memberData);
+
+        const surveyData = await getLatestSkinSurveyByUser(memberData.id).catch(() => {
           console.warn("피부 진단 API가 아직 준비되지 않았습니다.");
-          return { skinType: "DRY", concerns: ["PORE"] };
+          return null;
         });
         setSurvey(surveyData);
 
         const recommendationPage = await getRecommendationHistoriesByUser(
-          1,
+          memberData.id,
           0,
           5,
         ).catch(() => {
@@ -128,30 +127,41 @@ export default function SkinDashboard() {
     <div className="skin-dashboard">
       <div className="skin-dashboard-wrap">
         <section className="skin-dashboard-hero">
-          <p className="skin-dashboard-kicker">MY PAGE</p>
-          <h1>{MOCK_USER.name}님의 통합 조회</h1>
-          <p>
-            피부 진단, 추천 시술, 예약, 결제, 상담, 시술 기록, 알림을 한 번에
-            확인할 수 있어요.
-          </p>
-        </section>
-
-        <section className="skin-dashboard-summary-grid">
-          <div className="skin-dashboard-summary-card">
-            <span>피부 타입</span>
-            <strong>{survey ? getSkinTypeLabel(survey.skinType) : "-"}</strong>
+          <div className="skin-dashboard-hero-content">
+            <p className="skin-dashboard-kicker">MY PAGE OVERVIEW</p>
+            <h1>{member?.name || member?.loginId || "회원"}님의 통합 조회</h1>
+            <p>
+              피부 진단, 추천 시술, 예약, 결제, 상담, 시술 기록, 알림까지 내 피부
+              여정을 한 화면에서 정리해드려요.
+            </p>
+            <div className="skin-dashboard-widget-row">
+              <div className="skin-dashboard-widget">
+                <span className="skin-dashboard-widget-emoji">🧴</span>
+                <div>
+                  <strong>{survey ? getSkinTypeLabel(survey.skinType) : "진단 필요"}</strong>
+                  <p>현재 피부 컨디션</p>
+                </div>
+              </div>
+              <div className="skin-dashboard-widget">
+                <span className="skin-dashboard-widget-emoji">✨</span>
+                <div>
+                  <strong>{recommendations.length}개 추천</strong>
+                  <p>최근 맞춤 시술 제안</p>
+                </div>
+              </div>
+              <div className="skin-dashboard-widget">
+                <span className="skin-dashboard-widget-emoji">📬</span>
+                <div>
+                  <strong>{mockNotifications.length}개 알림</strong>
+                  <p>확인할 업데이트</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="skin-dashboard-summary-card">
-            <span>추천 시술</span>
-            <strong>{recommendations.length}건</strong>
-          </div>
-          <div className="skin-dashboard-summary-card">
-            <span>예약 내역</span>
-            <strong>{mockReservations.length}건</strong>
-          </div>
-          <div className="skin-dashboard-summary-card">
-            <span>알림</span>
-            <strong>{mockNotifications.length}건</strong>
+          <div className="skin-dashboard-hero-aside">
+            <span>최근 진단</span>
+            <strong>{survey ? getSkinTypeLabel(survey.skinType) : "미등록"}</strong>
+            <p>{recommendations.length > 0 ? `${recommendations.length}개의 추천 기록 보유` : "추천 기록을 쌓아보세요"}</p>
           </div>
         </section>
 
@@ -181,7 +191,7 @@ export default function SkinDashboard() {
                   key={item.recommendationId}
                   className="skin-dashboard-list-item"
                 >
-                  <strong>추천 #{item.recommendationId}</strong>
+                  <strong>✨ 추천 #{item.recommendationId}</strong>
                   <p>{getSkinTypeLabel(item.skinTypeCode)}</p>
                   <p>
                     {item.concernCodes?.map(getSkinConcernLabel).join(", ") ||
@@ -200,7 +210,7 @@ export default function SkinDashboard() {
           <div className="skin-dashboard-list">
             {mockReservations.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
-                <strong>{item.procedureName}</strong>
+                <strong>📅 {item.procedureName}</strong>
                 <p>
                   {formatDateTime(`${item.date} ${item.time}`)}
                 </p>
@@ -215,7 +225,7 @@ export default function SkinDashboard() {
           <div className="skin-dashboard-list">
             {mockPayments.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
-                <strong>{item.procedureName}</strong>
+                <strong>💳 {item.procedureName}</strong>
                 <p>{item.amount.toLocaleString()}원</p>
                 <p>{item.status} / {formatDateTime(item.paidAt)}</p>
               </div>
@@ -228,7 +238,7 @@ export default function SkinDashboard() {
           <div className="skin-dashboard-list">
             {mockConsultations.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
-                <strong>{item.title}</strong>
+                <strong>💬 {item.title}</strong>
                 <p>{item.lastMessage}</p>
                 <p>{formatDateTime(item.updatedAt)}</p>
               </div>
@@ -241,7 +251,7 @@ export default function SkinDashboard() {
           <div className="skin-dashboard-list">
             {mockRecords.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
-                <strong>{item.procedureName}</strong>
+                <strong>📷 {item.procedureName}</strong>
                 <p>시술일: {formatDateTime(item.treatedAt)}</p>
                 <p>
                   {item.beforeImage} / {item.afterImage}
@@ -256,7 +266,7 @@ export default function SkinDashboard() {
           <div className="skin-dashboard-list">
             {mockNotifications.map((item) => (
               <div key={item.id} className="skin-dashboard-list-item">
-                <strong>[{item.type}]</strong>
+                <strong>🔔 [{item.type}]</strong>
                 <p>{item.message}</p>
                 <p>{formatDateTime(item.createdAt)}</p>
               </div>

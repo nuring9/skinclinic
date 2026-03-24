@@ -163,8 +163,8 @@ export default function RecommendationResultPage() {
           >
             설문 결과로 돌아가기
           </button>
-          <button onClick={() => navigate("/recommendations")}>
-            전체 추천 이력 보기
+          <button onClick={() => navigate("/mypage/recommendations")}>
+            내 맞춤 추천 보기
           </button>
           <button onClick={() => navigate("/")}>메인으로 이동</button>
         </div>

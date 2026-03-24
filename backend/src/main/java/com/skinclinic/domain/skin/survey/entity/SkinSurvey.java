@@ -58,11 +58,13 @@ public class SkinSurvey {
 
     @Builder
     public SkinSurvey(
+            Long userId,
             SkinType skinType,
             Set<SkinConcern> concerns,
             Set<SkinArea> skinAreas,
             Map<String, String> questionAnswers
     ){
+        this.userId = userId;
         this.skinType = skinType;
         this.concerns = concerns != null ? concerns : new HashSet<>();
         this.skinAreas = skinAreas != null ? skinAreas : new LinkedHashSet<>();

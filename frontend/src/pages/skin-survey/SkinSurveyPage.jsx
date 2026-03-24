@@ -83,6 +83,22 @@ export default function SkinSurveyPage() {
             피부 타입, 고민, 부위별 상태, 추가 문진 10문항을 바탕으로 점수를
             합산해서 맞춤 시술을 추천해드려요.
           </p>
+          <div className="survey-hero-widget-row">
+            <div className="survey-hero-widget">
+              <span className="survey-hero-widget__emoji">🧬</span>
+              <div>
+                <strong>피부 타입 분석</strong>
+                <p>현재 피부 컨디션의 기본 축을 먼저 정리해요.</p>
+              </div>
+            </div>
+            <div className="survey-hero-widget">
+              <span className="survey-hero-widget__emoji">✨</span>
+              <div>
+                <strong>맞춤 추천 연결</strong>
+                <p>응답을 모아서 우선순위 높은 시술만 선별해요.</p>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="survey-hero__image">
           <div className="hero-image-card">
@@ -114,7 +130,7 @@ export default function SkinSurveyPage() {
                 <p>가장 가까운 피부 타입 하나를 선택해주세요.</p>
               </div>
 
-              <div className="survey-option-grid type-grid">
+              <div className="survey-option-grid type-grid survey-type-grid-wrap">
                 {skinTypes.map((type) => (
                   <label
                     key={type.value}

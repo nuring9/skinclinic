@@ -7,6 +7,7 @@ import {
   triggerNotificationEvent,
 } from "@/api/notificationApi";
 import "@/pages/mypage/mypagesection.css";
+import "./admin-notification.css";
 
 const initialForm = {
   userId: 1,
@@ -90,7 +91,7 @@ export default function AdminNotificationPage() {
     const keyword = memberQuery.trim().toLowerCase();
 
     if (!keyword) {
-      return members.slice(0, 8);
+      return [];
     }
 
     return members.filter((member) => {
@@ -177,82 +178,49 @@ export default function AdminNotificationPage() {
             <span>알림 이력</span>
             <strong>{selectedHistory.length}건</strong>
           </div>
-          <Link
-            to="/admin/procedure-satisfaction"
-            className="notification-read-button"
-            style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}
-          >
-            만족도 통계 보기
-          </Link>
         </div>
-      </div>
-
-      <div className="admin-search-layout">
-        <div className="mypage-section-item admin-search-panel">
-          <div className="admin-panel-head">
-            <div>
-              <h3>회원 검색</h3>
-              <p>이름, 회원 번호, 휴대폰 번호로 빠르게 찾을 수 있습니다.</p>
-            </div>
-            <span className="admin-panel-count">{filteredMembers.length}명</span>
-          </div>
-
-          <input
-            className="admin-member-search-input"
-            value={memberQuery}
-            onChange={(event) => setMemberQuery(event.target.value)}
-            placeholder="회원 이름, 번호, 휴대폰 번호로 검색"
-          />
-
-          <div className="admin-member-list">
-            {filteredMembers.map((member) => (
-              <button
-                key={member.memberId}
-                type="button"
-                className={`admin-member-list-item ${form.userId === member.memberId ? "active" : ""}`}
-                onClick={() =>
-                  setForm((prev) => ({ ...prev, userId: member.memberId }))
-                }
-              >
-                <div className="admin-member-list-main">
-                  <strong>{member.memberName}</strong>
-                  <span>{member.phone || "휴대폰 없음"}</span>
-                </div>
-                <div className="admin-member-list-meta">
-                  <span>#{member.memberId}</span>
-                  <span>{member.memberType}</span>
-                </div>
-              </button>
-            ))}
-            {filteredMembers.length === 0 && (
-              <div className="admin-member-empty">
-                검색 조건에 맞는 회원이 없습니다.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {selectedMember && (
-          <div className="mypage-section-item admin-selected-card">
-            <div className="admin-selected-card-body">
-              <span className="admin-status-label">선택된 회원</span>
-              <div className="admin-selected-member-row">
-                <strong>{selectedMember.memberName}</strong>
-                <span>/</span>
-                <strong>{selectedMember.memberType}</strong>
-              </div>
-              <div className="admin-selected-details">
-                <p>회원 번호: {selectedMember.memberId}</p>
-                <p>휴대폰: {selectedMember.phone || "없음"}</p>
-                <p>안 읽은 포함 전체 이력: {selectedHistory.length}건</p>
-              </div>
-              <p>{selectedMember.demoScenario}</p>
-            </div>
-          </div>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="mypage-section-list admin-form">
+        <div className="mypage-section-item admin-form-card admin-search-inline-card">
+          <p>회원검색</p>
+          <input
+            className="notification-member-search-input"
+            value={memberQuery}
+            onChange={(event) => setMemberQuery(event.target.value)}
+            placeholder="이름, 회원 번호, 휴대폰 번호 검색"
+          />
+
+          {memberQuery.trim() && (
+            <div className="notification-member-list">
+              {filteredMembers.map((member) => (
+                <button
+                  key={member.memberId}
+                  type="button"
+                  className={`notification-member-list-item ${form.userId === member.memberId ? "active" : ""}`}
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, userId: member.memberId }))
+                  }
+                >
+                  <div className="notification-member-list-main">
+                    <strong>{member.memberName}</strong>
+                    <span>{member.phone || "휴대폰 없음"}</span>
+                  </div>
+                  <div className="notification-member-list-meta">
+                    <span>#{member.memberId}</span>
+                    <span>{member.memberType}</span>
+                  </div>
+                </button>
+              ))}
+              {filteredMembers.length === 0 && (
+                <div className="notification-member-empty">
+                  검색 조건에 맞는 회원이 없습니다.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="mypage-section-item admin-form-card">
           <p>대상 회원</p>
           <select name="userId" value={form.userId} onChange={handleChange}>
@@ -344,7 +312,10 @@ export default function AdminNotificationPage() {
 
         <div className="mypage-section-list">
           {selectedHistory.map((item) => (
-            <div key={item.id} className="mypage-section-item admin-history-card">
+            <div
+              key={item.id}
+              className="mypage-section-item admin-history-card"
+            >
               <div className="admin-history-card-top">
                 <strong>
                   [{TYPE_LABEL[item.type]}] {item.title}

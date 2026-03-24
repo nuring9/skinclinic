@@ -52,4 +52,12 @@ public class RecommendationController {
         return ResponseEntity.ok(recommendationService.getAllRecommendations(pageable));
     }
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<Page<RecommendationResponse>> getRecommendationHistoriesByUser(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(recommendationService.getRecommendationHistoriesByUser(userId, pageable));
+    }
+
 }

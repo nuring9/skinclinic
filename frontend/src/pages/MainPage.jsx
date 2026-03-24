@@ -1,55 +1,48 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MainPage() {
-  // 보통은 로그인을 하거나 조회를 해서 ID를 가져오지만,
-  // 지금은 테스트를 위해 가장 최근 ID가 1번이라고 가정해볼게요.
-  const sampleId = 1;
+  const { isAuthenticated, user } = useAuth();
 
   return (
-    <div>
-      <h1>메인 페이지</h1>
-      <p>나중에 팀원 메인 채워넣기</p>
+    <section className="landing-page">
+      <div className="landing-hero">
+        <p className="landing-eyebrow">Personalized Care Journey</p>
+        <h1>로그인부터 피부 진단, 추천, 마이페이지까지 한 번에 연결했습니다.</h1>
+        <p className="landing-copy">
+          {isAuthenticated
+            ? `${user.loginId}님, 지금 바로 마이페이지에서 내 기록을 확인해보세요.`
+            : "계정을 만들고 로그인하면 개인화된 추천과 마이페이지 기능을 사용할 수 있어요."}
+        </p>
+        <div className="landing-actions">
+          <Link to={isAuthenticated ? "/mypage" : "/login"}>
+            <button>{isAuthenticated ? "마이페이지 열기" : "로그인하기"}</button>
+          </Link>
+          {!isAuthenticated ? (
+            <Link to="/signup">
+              <button>회원가입</button>
+            </Link>
+          ) : null}
+        </div>
+      </div>
 
-      {/* 1. 설문 시작 */}
-      <Link to="/skin-survey">
-        <button>피부 설문 시작</button>
-      </Link>
-      <br />
-      <br />
-
-      {/* 2. 전체 목록 */}
-      <Link to="/recommendations">
-        <button>전체 추천 이력 목록 보기</button>
-      </Link>
-      <br />
-      <br />
-
-      {/* 3. 특정 상세 페이지 (변수를 넣어서 동적으로 만들기) */}
-      <Link to={`/recommendations/${sampleId}`}>
-        <button>최근 맞춤 시술 추천 상세 보기</button>
-      </Link>
-      <br />
-      <br />
-
-      {/* 마이페이지 */}
-      <Link to="/mypage">
-        <button>마이페이지 보기</button>
-      </Link>
-      <br />
-      <br />
-      <Link to="/mypage/records">
-        <button>시술 만족도 평가하러 가기</button>
-      </Link>
-      <br />
-      <br />
-      <Link to="/admin/notifications">
-        <button>관리자 알림 관리 보기</button>
-      </Link>
-      <br />
-      <br />
-      <Link to="/admin/procedure-satisfaction">
-        <button>관리자 만족도 통계 보기</button>
-      </Link>
-    </div>
+      <div className="landing-links">
+        <Link to="/skin-survey">
+          <button>피부 설문 시작</button>
+        </Link>
+        <Link to="/mypage/recommendations">
+          <button>내 맞춤 추천 보기</button>
+        </Link>
+        <Link to="/mypage/records">
+          <button>시술 만족도 평가하러 가기</button>
+        </Link>
+        <Link to="/admin/notifications">
+          <button>관리자 알림 관리 보기</button>
+        </Link>
+        <Link to="/admin/procedure-satisfaction">
+          <button>관리자 만족도 통계 보기</button>
+        </Link>
+      </div>
+    </section>
   );
 }

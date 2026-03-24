@@ -12,26 +12,122 @@
 .skin-dashboard-card,
 .skin-dashboard-summary-card {
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border-radius: 28px;
+  box-shadow: 0 18px 42px rgba(70, 54, 45, 0.08);
 }
 
 .skin-dashboard-hero,
 .skin-dashboard-card {
-  padding: 28px;
+  padding: 30px;
   margin-bottom: 24px;
+}
+
+.skin-dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 213, 169, 0.55), transparent 28%),
+    linear-gradient(145deg, #fff8f1, #fffefd 58%, #f3f7fb);
+  border: 1px solid rgba(228, 215, 201, 0.84);
+}
+
+.skin-dashboard-hero-content {
+  max-width: 620px;
+}
+
+.skin-dashboard-widget-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.skin-dashboard-widget {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(227, 211, 196, 0.88);
+}
+
+.skin-dashboard-widget-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f5e2cd, #fff5eb);
+  font-size: 22px;
+}
+
+.skin-dashboard-widget strong {
+  display: block;
+  color: #3b2f26;
+  font-size: 16px;
+}
+
+.skin-dashboard-widget p {
+  margin: 4px 0 0;
+  color: #7a6b61;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.skin-dashboard-hero-aside {
+  min-width: 220px;
+  padding: 22px 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(227, 211, 196, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.skin-dashboard-hero-aside span {
+  display: block;
+  color: #907a68;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.skin-dashboard-hero-aside strong {
+  display: block;
+  margin-top: 10px;
+  color: #3c2f27;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.skin-dashboard-hero-aside p {
+  margin: 10px 0 0;
+  color: #74675d;
+  line-height: 1.55;
 }
 
 .skin-dashboard-kicker {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: #9a7b68;
-  margin-bottom: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
 .skin-dashboard-hero h1 {
   margin: 0 0 12px;
-  font-size: 34px;
+  font-size: 40px;
+  line-height: 1.08;
+}
+
+.skin-dashboard-hero p {
+  margin: 0;
+  color: #6d6158;
+  line-height: 1.7;
 }
 
 .skin-dashboard-summary-grid {
@@ -42,22 +138,41 @@
 }
 
 .skin-dashboard-summary-card {
-  padding: 22px;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 243, 236, 0.98));
+  border: 1px solid rgba(228, 214, 201, 0.92);
+}
+
+.skin-dashboard-summary-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f3dfc9, #fff6ec);
+  font-size: 22px;
 }
 
 .skin-dashboard-summary-card span {
   display: block;
   color: #8f8178;
   margin-bottom: 8px;
+  font-size: 13px;
 }
 
 .skin-dashboard-summary-card strong {
-  font-size: 22px;
+  font-size: 28px;
+  color: #3f3027;
 }
 
 .skin-dashboard-card h2 {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  color: #3c2e25;
+  font-size: 26px;
 }
 
 .skin-dashboard-list {
@@ -67,18 +182,33 @@
 }
 
 .skin-dashboard-list-item {
-  padding: 16px 18px;
-  border-radius: 16px;
-  background: #faf7f4;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 242, 235, 0.96));
   border: 1px solid #ede2da;
+}
+
+.skin-dashboard-list-item strong {
+  color: #3d3027;
+  font-size: 17px;
 }
 
 .skin-dashboard-list-item p {
   margin: 6px 0 0;
   color: #655b55;
+  line-height: 1.6;
 }
 
 @media (max-width: 900px) {
+  .skin-dashboard-hero {
+    flex-direction: column;
+  }
+
+  .skin-dashboard-widget-row {
+    grid-template-columns: 1fr;
+  }
+
   .skin-dashboard-summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -90,6 +220,6 @@
   }
 
   .skin-dashboard-hero h1 {
-    font-size: 28px;
+    font-size: 30px;
   }
 }

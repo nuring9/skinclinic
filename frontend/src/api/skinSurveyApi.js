@@ -16,4 +16,16 @@ export const getSkinSurvey = async (id) => {
   return response.data;
 };
 
+export const getLatestSkinSurveyByUser = async (userId) => {
+  const response = await api.get(`/api/skin-surveys/users/${userId}/latest`);
+  return response.data;
+};
+
+export const getSkinSurveysByUser = async (userId, page = 0, size = 1) => {
+  const response = await api.get(`/api/skin-surveys/users/${userId}`, {
+    params: { page, size },
+  });
+  return response.data;
+};
+
 // 이 파일은 백엔드 API 호출 전용 파일임.

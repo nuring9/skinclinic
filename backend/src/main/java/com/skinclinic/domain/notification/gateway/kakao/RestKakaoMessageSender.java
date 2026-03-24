@@ -12,12 +12,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import lombok.extern.slf4j.Slf4j;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Map;
 
 @Component
 @ConditionalOnProperty(value = "notification.kakao.provider", havingValue = "rest")
+@Slf4j
 public class RestKakaoMessageSender implements KakaoMessageSender {
+    private static final String DEV_NOTIFICATION_URL = "http://192.168.219.100:5173/mypage/notifications";
+
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
@@ -36,9 +43,11 @@ public class RestKakaoMessageSender implements KakaoMessageSender {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
-        this.webUrl = webUrl;
-        this.mobileWebUrl = mobileWebUrl;
+        this.webUrl = normalizeNotificationUrl(webUrl);
+        this.mobileWebUrl = normalizeNotificationUrl(mobileWebUrl);
         this.buttonTitle = buttonTitle;
+        log.info("Kakao message sender initialized. webUrl={}, mobileWebUrl={}, buttonTitle={}",
+                this.webUrl, this.mobileWebUrl, this.buttonTitle);
     }
 
     @Override
@@ -60,8 +69,16 @@ public class RestKakaoMessageSender implements KakaoMessageSender {
         }
 
         try {
+            String templateObject = buildTemplateObject(title, message);
+            log.info(
+                    "Sending Kakao memo. memberId={}, baseWebUrl={}, baseMobileWebUrl={}, templateObject={}",
+                    memberInfo.memberId(),
+                    webUrl,
+                    mobileWebUrl,
+                    templateObject
+            );
             LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("template_object", buildTemplateObject(title, message));
+            body.add("template_object", templateObject);
 
             Map<?, ?> response = restClient.post()
                     .uri("/v2/api/talk/memo/default/send")
@@ -71,31 +88,86 @@ public class RestKakaoMessageSender implements KakaoMessageSender {
                     .retrieve()
                     .body(Map.class);
 
+            log.info("Kakao memo response. memberId={}, response={}", memberInfo.memberId(), response);
+
             Object resultCode = response == null ? null : response.get("result_code");
             if (resultCode instanceof Number number && number.intValue() == 0) {
-                return new KakaoSendResult(true, FailureReason.NONE, "카카오 나에게 메시지 전송 성공");
+                return new KakaoSendResult(
+                        true,
+                        FailureReason.NONE,
+                        "카카오 나에게 메시지 전송 성공 / webUrl=" + webUrl + " / mobileWebUrl=" + mobileWebUrl
+                );
             }
 
-            return new KakaoSendResult(false, FailureReason.UNKNOWN, "카카오 메시지 응답이 올바르지 않습니다.");
+            return new KakaoSendResult(
+                    false,
+                    FailureReason.UNKNOWN,
+                    "카카오 메시지 응답이 올바르지 않습니다. / webUrl=" + webUrl + " / mobileWebUrl=" + mobileWebUrl
+            );
         } catch (RestClientResponseException exception) {
-            return new KakaoSendResult(false, mapFailureReason(exception), "카카오 메시지 발송 실패: " + exception.getResponseBodyAsString());
+            return new KakaoSendResult(
+                    false,
+                    mapFailureReason(exception),
+                    "카카오 메시지 발송 실패: " + exception.getResponseBodyAsString()
+                            + " / webUrl=" + webUrl
+                            + " / mobileWebUrl=" + mobileWebUrl
+            );
         } catch (Exception exception) {
-            return new KakaoSendResult(false, FailureReason.UNKNOWN, "카카오 메시지 발송 예외: " + exception.getMessage());
+            return new KakaoSendResult(
+                    false,
+                    FailureReason.UNKNOWN,
+                    "카카오 메시지 발송 예외: " + exception.getMessage()
+                            + " / webUrl=" + webUrl
+                            + " / mobileWebUrl=" + mobileWebUrl
+            );
         }
     }
 
     private String buildTemplateObject(String title, String message) throws JsonProcessingException {
+        String trackedWebUrl = appendTrackingQuery(webUrl);
+        String trackedMobileWebUrl = appendTrackingQuery(mobileWebUrl);
+        log.info(
+                "Kakao memo tracked links. trackedWebUrl={}, trackedMobileWebUrl={}",
+                trackedWebUrl,
+                trackedMobileWebUrl
+        );
+        String textWithDirectUrl = "[" + title + "]\n" + message
+                + "\n\n알림 링크:\n" + trackedMobileWebUrl;
+
         Map<String, Object> template = Map.of(
                 "object_type", "text",
-                "text", "[" + title + "]\n" + message,
+                "text", textWithDirectUrl,
                 "link", Map.of(
-                        "web_url", webUrl,
-                        "mobile_web_url", mobileWebUrl
+                        "web_url", trackedWebUrl,
+                        "mobile_web_url", trackedMobileWebUrl
                 ),
-                "button_title", buttonTitle
+                "buttons", java.util.List.of(
+                        Map.of(
+                                "title", buttonTitle,
+                                "link", Map.of(
+                                        "web_url", trackedWebUrl,
+                                        "mobile_web_url", trackedMobileWebUrl
+                                )
+                        )
+                )
         );
 
         return objectMapper.writeValueAsString(template);
+    }
+
+    private String appendTrackingQuery(String url) {
+        String separator = url.contains("?") ? "&" : "?";
+        String source = URLEncoder.encode("kakao", StandardCharsets.UTF_8);
+        String timestamp = String.valueOf(Instant.now().toEpochMilli());
+        return url + separator + "from=" + source + "&t=" + timestamp;
+    }
+
+    private String normalizeNotificationUrl(String url) {
+        if (url == null || url.isBlank() || url.contains("localhost")) {
+            log.warn("Kakao notification URL '{}' is not reachable on mobile. Falling back to {}", url, DEV_NOTIFICATION_URL);
+            return DEV_NOTIFICATION_URL;
+        }
+        return url;
     }
 
     private FailureReason mapFailureReason(RestClientResponseException exception) {

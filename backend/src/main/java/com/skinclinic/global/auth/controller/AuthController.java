@@ -1,5 +1,6 @@
 package com.skinclinic.global.auth.controller;
 
+import com.skinclinic.global.auth.CustomUserDetails;
 import com.skinclinic.global.auth.dto.AuthCheckResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,13 @@ public class AuthController {
         }
 
         String loginId = authentication.getName();
+        Long memberId = null;
+        String name = null;
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            memberId = userDetails.getMember().getId();
+            name = userDetails.getMember().getName();
+        }
 
         String role = authentication.getAuthorities().stream()
                 .findFirst()
@@ -30,7 +38,9 @@ public class AuthController {
 
         AuthCheckResponse response = AuthCheckResponse.builder()
                 .authenticated(true)
+                .id(memberId)
                 .loginId(loginId)
+                .name(name)
                 .role(role)
                 .build();
 

@@ -1,13 +1,17 @@
 package com.skinclinic.domain.notification.controller;
 
+import com.skinclinic.global.auth.CustomUserDetails;
 import com.skinclinic.domain.notification.dto.NotificationCreateRequest;
 import com.skinclinic.domain.notification.dto.NotificationEventTriggerRequest;
+import com.skinclinic.domain.notification.dto.MyNotificationTriggerRequest;
 import com.skinclinic.domain.notification.dto.NotificationMemberResponse;
 import com.skinclinic.domain.notification.dto.NotificationResponse;
 import com.skinclinic.domain.notification.enumtype.NotificationType;
 import com.skinclinic.domain.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +45,27 @@ public class NotificationController {
     @PatchMapping("/notifications/{notificationId}/kakao-sent")
     public NotificationResponse markKakaoSent(@PathVariable Long notificationId) {
         return notificationService.markKakaoSent(notificationId);
+    }
+
+    @PostMapping("/notifications/me/test")
+    public NotificationResponse triggerMyNotification(
+            @RequestBody @Valid MyNotificationTriggerRequest request,
+            Authentication authentication
+    ) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken
+                || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
+        return notificationService.triggerNotificationEvent(new NotificationEventTriggerRequest(
+                userDetails.getMember().getId(),
+                request.type(),
+                request.title(),
+                request.message(),
+                request.eventReference()
+        ));
     }
 
     @GetMapping("/admin/notifications")

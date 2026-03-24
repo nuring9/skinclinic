@@ -26,6 +26,11 @@ export const markNotificationAsKakaoSent = async (notificationId) => {
   return response.data;
 };
 
+export const triggerMyNotification = async (payload) => {
+  const response = await api.post("/api/notifications/me/test", payload);
+  return response.data;
+};
+
 export const getAllNotifications = async (type = "ALL") => {
   const response = await api.get("/api/admin/notifications", {
     params: type === "ALL" ? {} : { type },

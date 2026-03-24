@@ -6,6 +6,7 @@ import {
   getNotificationMembers,
   triggerNotificationEvent,
 } from "@/api/notificationApi";
+import { useAuth } from "@/context/AuthContext";
 import "@/pages/mypage/mypagesection.css";
 import "./admin-notification.css";
 
@@ -56,21 +57,104 @@ const getDefaultMessagePreview = (memberName, type, eventReference) => {
   }
 };
 
+const getMemberOptionLabel = (member) =>
+  `${member.memberName} - ${member.phone || "휴대폰 없음"}`;
+
+const buildDeliveryModalState = (notification) => {
+  const lastAttempt = notification?.attempts?.at(-1);
+  const success = Boolean(notification?.kakaoSent || notification?.smsSent);
+
+  if (success) {
+    return {
+      open: true,
+      title: "전송 완료",
+      message:
+        notification?.deliverySummary ||
+        lastAttempt?.detail ||
+        "메시지 전송이 완료되었습니다.",
+      tone: "success",
+    };
+  }
+
+  return {
+    open: true,
+    title: "전송 실패",
+    message:
+      lastAttempt?.detail ||
+      notification?.deliverySummary ||
+      "메시지 전송 중 문제가 발생했습니다. 설정과 발송 이력을 확인해주세요.",
+    tone: "warning",
+  };
+};
+
 export default function AdminNotificationPage() {
+  const { user } = useAuth();
   const [form, setForm] = useState(initialForm);
   const [members, setMembers] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [lastResult, setLastResult] = useState(null);
   const [memberQuery, setMemberQuery] = useState("");
+  const [memberLoadError, setMemberLoadError] = useState("");
+  const [notificationLoadError, setNotificationLoadError] = useState("");
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState(false);
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  const [showMemberNoResult, setShowMemberNoResult] = useState(false);
+  const [modalState, setModalState] = useState({
+    open: false,
+    title: "",
+    message: "",
+    tone: "success",
+  });
 
   const loadPage = async () => {
-    const [memberData, notificationData] = await Promise.all([
+    setIsLoadingMembers(true);
+    setMemberLoadError("");
+    setNotificationLoadError("");
+
+    const [memberResult, notificationResult] = await Promise.allSettled([
       getNotificationMembers(),
       getAllNotifications(),
     ]);
 
-    setMembers(memberData);
-    setNotifications(notificationData);
+    if (memberResult.status === "fulfilled") {
+      const memberData = memberResult.value;
+      setMembers(memberData);
+
+      if (memberData.length > 0) {
+        const preferredMemberId =
+          memberData.find((item) => item.memberId === user?.id)?.memberId ??
+          memberData[0].memberId;
+
+        setForm((prev) => ({
+          ...prev,
+          userId:
+            memberData.some((item) => item.memberId === prev.userId)
+              ? prev.userId
+              : preferredMemberId,
+        }));
+      }
+    } else {
+      console.error("회원 목록 조회 실패", memberResult.reason);
+      setMembers([]);
+      setMemberLoadError(
+        memberResult.reason?.response?.data?.message ||
+          "회원 목록을 불러오지 못했습니다. 관리자 권한과 서버 응답을 확인해주세요.",
+      );
+    }
+
+    if (notificationResult.status === "fulfilled") {
+      setNotifications(notificationResult.value);
+    } else {
+      console.error("알림 이력 조회 실패", notificationResult.reason);
+      setNotifications([]);
+      setNotificationLoadError(
+        notificationResult.reason?.response?.data?.message ||
+          "알림 이력을 불러오지 못했습니다.",
+      );
+    }
+
+    setIsLoadingMembers(false);
   };
 
   useEffect(() => {
@@ -91,7 +175,7 @@ export default function AdminNotificationPage() {
     const keyword = memberQuery.trim().toLowerCase();
 
     if (!keyword) {
-      return [];
+      return members;
     }
 
     return members.filter((member) => {
@@ -100,6 +184,7 @@ export default function AdminNotificationPage() {
         member.memberName,
         member.memberType,
         member.phone || "",
+        getMemberOptionLabel(member),
       ]
         .join(" ")
         .toLowerCase();
@@ -131,8 +216,46 @@ export default function AdminNotificationPage() {
     }));
   };
 
+  const handleMemberQueryChange = (event) => {
+    const value = event.target.value;
+    setMemberQuery(value);
+    setIsMemberDropdownOpen(true);
+    setShowMemberNoResult(false);
+
+    const matchedMember = members.find(
+      (member) => getMemberOptionLabel(member) === value,
+    );
+
+    if (matchedMember) {
+      setForm((prev) => ({
+        ...prev,
+        userId: matchedMember.memberId,
+      }));
+    }
+  };
+
+  const handleMemberSelect = (member) => {
+    setMemberQuery(getMemberOptionLabel(member));
+    setForm((prev) => ({
+      ...prev,
+      userId: member.memberId,
+    }));
+    setIsMemberDropdownOpen(false);
+    setShowMemberNoResult(false);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!selectedMember) {
+      setModalState({
+        open: true,
+        title: "대상 회원 확인",
+        message: "먼저 회원검색에서 대상 회원을 선택해주세요.",
+        tone: "warning",
+      });
+      return;
+    }
 
     try {
       const data = await triggerNotificationEvent({
@@ -152,15 +275,55 @@ export default function AdminNotificationPage() {
       }));
 
       await loadPage();
-      alert("자동 알림 이벤트가 DB에 저장되었습니다.");
+      setModalState(buildDeliveryModalState(data));
     } catch (error) {
       console.error("자동 알림 생성 실패", error);
-      alert("자동 알림 생성에 실패했습니다.");
+      setModalState({
+        open: true,
+        title: "전송 실패",
+        message:
+          error?.response?.data?.message ||
+          "메시지 전송 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        tone: "warning",
+      });
     }
   };
 
   return (
     <section className="mypage-section-card admin-notification-page">
+      {modalState.open ? (
+        <div
+          className="admin-modal-backdrop"
+          role="presentation"
+          onClick={() =>
+            setModalState((current) => ({ ...current, open: false }))
+          }
+        >
+          <div
+            className={`admin-modal admin-modal-${modalState.tone}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className="admin-modal-kicker">
+              {modalState.tone === "success" ? "Notification Sent" : "Check Required"}
+            </span>
+            <h3 id="admin-modal-title">{modalState.title}</h3>
+            <p>{modalState.message}</p>
+            <button
+              type="button"
+              className="admin-modal-button"
+              onClick={() =>
+                setModalState((current) => ({ ...current, open: false }))
+              }
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="notification-header admin-notification-hero">
         <div>
           <span className="admin-notification-badge">Notification Control</span>
@@ -181,64 +344,140 @@ export default function AdminNotificationPage() {
         </div>
       </div>
 
+      {memberLoadError ? (
+        <div className="admin-notification-feedback admin-notification-feedback-error">
+          회원 목록 오류: {memberLoadError}
+        </div>
+      ) : null}
+
+      {notificationLoadError ? (
+        <div className="admin-notification-feedback admin-notification-feedback-warning">
+          알림 이력 오류: {notificationLoadError}
+        </div>
+      ) : null}
+
       <form onSubmit={handleSubmit} className="mypage-section-list admin-form">
         <div className="mypage-section-item admin-form-card admin-search-inline-card">
           <p>회원검색</p>
-          <input
-            className="notification-member-search-input"
-            value={memberQuery}
-            onChange={(event) => setMemberQuery(event.target.value)}
-            placeholder="이름, 회원 번호, 휴대폰 번호 검색"
-          />
+          <div className="notification-member-search-wrap">
+            <input
+              className="notification-member-search-input"
+              value={memberQuery}
+              onChange={handleMemberQueryChange}
+              placeholder="이름, 회원 번호, 휴대폰 번호 검색"
+              disabled={isLoadingMembers || members.length === 0}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") {
+                  return;
+                }
 
-          {memberQuery.trim() && (
-            <div className="notification-member-list">
-              {filteredMembers.map((member) => (
-                <button
-                  key={member.memberId}
-                  type="button"
-                  className={`notification-member-list-item ${form.userId === member.memberId ? "active" : ""}`}
-                  onClick={() =>
-                    setForm((prev) => ({ ...prev, userId: member.memberId }))
-                  }
-                >
-                  <div className="notification-member-list-main">
-                    <strong>{member.memberName}</strong>
-                    <span>{member.phone || "휴대폰 없음"}</span>
-                  </div>
-                  <div className="notification-member-list-meta">
-                    <span>#{member.memberId}</span>
-                    <span>{member.memberType}</span>
-                  </div>
-                </button>
-              ))}
-              {filteredMembers.length === 0 && (
-                <div className="notification-member-empty">
-                  검색 조건에 맞는 회원이 없습니다.
-                </div>
-              )}
-            </div>
-          )}
+                if (filteredMembers.length === 0) {
+                  setIsMemberDropdownOpen(false);
+                  setShowMemberNoResult(true);
+                  return;
+                }
+
+                setIsMemberDropdownOpen(true);
+                setShowMemberNoResult(false);
+              }}
+              onBlur={() => {
+                window.setTimeout(() => {
+                  setIsMemberDropdownOpen(false);
+                }, 120);
+              }}
+            />
+            <button
+              type="button"
+              className={`notification-member-toggle ${isMemberDropdownOpen ? "open" : ""}`}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setIsMemberDropdownOpen((prev) => !prev)}
+              disabled={isLoadingMembers || members.length === 0}
+              aria-label="회원 목록 펼치기"
+            >
+              <span className="notification-member-toggle-icon" />
+            </button>
+            {isLoadingMembers ? (
+              <div className="notification-member-empty notification-member-overlay-empty">
+                회원 목록을 불러오는 중입니다.
+              </div>
+            ) : isMemberDropdownOpen && filteredMembers.length > 0 ? (
+              <div className="notification-member-list">
+                {filteredMembers.map((member) => (
+                  <button
+                    key={member.memberId}
+                    type="button"
+                    className={`notification-member-list-item ${form.userId === member.memberId ? "active" : ""}`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleMemberSelect(member)}
+                  >
+                    <span className="notification-member-list-label">
+                      {getMemberOptionLabel(member)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : showMemberNoResult ? (
+              <div className="notification-member-empty notification-member-overlay-empty">
+                검색 조건에 맞는 회원이 없습니다.
+              </div>
+            ) : members.length === 0 ? (
+              <div className="notification-member-empty notification-member-overlay-empty">
+                불러온 회원이 없습니다. 회원가입된 계정이 있는지 확인해주세요.
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="mypage-section-item admin-form-card">
           <p>대상 회원</p>
-          <select name="userId" value={form.userId} onChange={handleChange}>
-            {members.map((member) => (
-              <option key={member.memberId} value={member.memberId}>
-                {member.memberId} - {member.memberName}
-              </option>
-            ))}
-          </select>
+          <input
+            type="text"
+            value={selectedMember ? getMemberOptionLabel(selectedMember) : ""}
+            readOnly
+            placeholder="회원검색에서 선택한 회원이 표시됩니다"
+          />
         </div>
 
         <div className="mypage-section-item admin-form-card">
           <p>이벤트 유형</p>
-          <select name="type" value={form.type} onChange={handleChange}>
-            <option value="RESERVATION">예약</option>
-            <option value="PAYMENT">결제</option>
-            <option value="CONSULTATION">상담</option>
-          </select>
+          <div className="admin-select-wrap">
+            <button
+              type="button"
+              className="admin-select-trigger"
+              disabled={!selectedMember}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setIsTypeDropdownOpen((prev) => !prev)}
+              onBlur={() => {
+                window.setTimeout(() => {
+                  setIsTypeDropdownOpen(false);
+                }, 120);
+              }}
+            >
+              {TYPE_LABEL[form.type]}
+            </button>
+            <span
+              className={`admin-select-icon ${isTypeDropdownOpen ? "open" : ""}`}
+              aria-hidden="true"
+            />
+            {isTypeDropdownOpen ? (
+              <div className="admin-select-list">
+                {Object.entries(TYPE_LABEL).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`admin-select-list-item ${form.type === value ? "active" : ""}`}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      setForm((prev) => ({ ...prev, type: value }));
+                      setIsTypeDropdownOpen(false);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="mypage-section-item admin-form-card admin-form-card-wide">

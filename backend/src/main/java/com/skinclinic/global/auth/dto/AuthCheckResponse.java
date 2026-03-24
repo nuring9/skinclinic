@@ -10,6 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthCheckResponse {
     private boolean authenticated;
+    private Long id;
     private String loginId;
+    private String name;
     private String role;
 }

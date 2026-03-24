@@ -42,6 +42,17 @@ public class Member {
     @Column(length = 100, unique = true)
     private String socialId;
 
+    @Column(length = 2048)
+    private String kakaoAccessToken;
+
+    @Column(length = 2048)
+    private String kakaoRefreshToken;
+
+    private LocalDateTime kakaoAccessTokenExpiresAt;
+
+    @Column(nullable = false)
+    private boolean kakaoTalkMessageAgreed = false;
+
     @Column(nullable = false)
     private boolean deleted = false;
 
@@ -78,6 +89,18 @@ public class Member {
         this.socialId = socialId;
     }
 
+    public void updateKakaoNotificationAuth(
+            String accessToken,
+            String refreshToken,
+            LocalDateTime accessTokenExpiresAt,
+            boolean talkMessageAgreed
+    ) {
+        this.kakaoAccessToken = accessToken;
+        this.kakaoRefreshToken = refreshToken;
+        this.kakaoAccessTokenExpiresAt = accessTokenExpiresAt;
+        this.kakaoTalkMessageAgreed = talkMessageAgreed;
+    }
+
     public void withdraw() {
         long deletedKey = System.currentTimeMillis();
 
@@ -87,6 +110,10 @@ public class Member {
         this.email = "deleted+" + this.id + "_" + deletedKey + "@withdrawn.local";
         this.socialProvider = null;
         this.socialId = null;
+        this.kakaoAccessToken = null;
+        this.kakaoRefreshToken = null;
+        this.kakaoAccessTokenExpiresAt = null;
+        this.kakaoTalkMessageAgreed = false;
         this.phone = "";
     }
 }

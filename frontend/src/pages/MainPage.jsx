@@ -2,7 +2,14 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 export default function MainPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  const primaryLink = isLoading ? "/" : isAuthenticated ? "/mypage" : "/login";
+  const primaryLabel = isLoading
+    ? "로그인 상태 확인 중..."
+    : isAuthenticated
+      ? "마이페이지 열기"
+      : "로그인하기";
 
   return (
     <section className="landing-page">
@@ -15,10 +22,12 @@ export default function MainPage() {
             : "계정을 만들고 로그인하면 개인화된 추천과 마이페이지 기능을 사용할 수 있어요."}
         </p>
         <div className="landing-actions">
-          <Link to={isAuthenticated ? "/mypage" : "/login"}>
-            <button>{isAuthenticated ? "마이페이지 열기" : "로그인하기"}</button>
+          <Link to={primaryLink}>
+            <button type="button" disabled={isLoading}>
+              {primaryLabel}
+            </button>
           </Link>
-          {!isAuthenticated ? (
+          {!isAuthenticated && !isLoading ? (
             <Link to="/signup">
               <button>회원가입</button>
             </Link>

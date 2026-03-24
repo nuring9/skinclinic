@@ -105,6 +105,30 @@ button:focus-visible {
   gap: 14px;
 }
 
+.main-header-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(209, 134, 65, 0.3);
+  background: rgba(255, 255, 255, 0.88);
+  color: #7d4718;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.main-header-link:hover {
+  color: #7d4718;
+  border-color: #d18641;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(191, 127, 58, 0.12);
+}
+
 .landing-page {
   max-width: 1200px;
   margin: 0 auto;

@@ -1,5 +1,13 @@
 const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js";
 
+const resolveNotificationPageUrl = () => {
+  if (typeof window === "undefined") {
+    return "http://localhost:5173/mypage/notifications";
+  }
+
+  return `${window.location.origin}/mypage/notifications`;
+};
+
 const loadKakaoSdk = () =>
   new Promise((resolve, reject) => {
     if (window.Kakao) {
@@ -64,6 +72,7 @@ export const sendNotificationToKakaoMemo = async ({
   typeLabel,
 }) => {
   const Kakao = await loginWithKakaoForMessage();
+  const notificationPageUrl = resolveNotificationPageUrl();
 
   await Kakao.API.request({
     url: "/v2/api/talk/memo/default/send",
@@ -72,8 +81,8 @@ export const sendNotificationToKakaoMemo = async ({
         object_type: "text",
         text: `[${typeLabel}] ${title}\n${message}`,
         link: {
-          web_url: "http://localhost:5173/mypage/notifications",
-          mobile_web_url: "http://localhost:5173/mypage/notifications",
+          web_url: notificationPageUrl,
+          mobile_web_url: notificationPageUrl,
         },
         button_title: "알림 확인하기",
       },

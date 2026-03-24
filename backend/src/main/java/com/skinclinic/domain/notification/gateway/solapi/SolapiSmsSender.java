@@ -3,12 +3,14 @@ package com.skinclinic.domain.notification.gateway.solapi;
 import com.skinclinic.domain.notification.gateway.SmsSender;
 import com.solapi.sdk.message.model.Message;
 import com.solapi.sdk.message.service.DefaultMessageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(value = "notification.sms.provider", havingValue = "solapi")
+@Slf4j
 public class SolapiSmsSender implements SmsSender {
 
     private final String apiKey;
@@ -26,6 +28,13 @@ public class SolapiSmsSender implements SmsSender {
         this.apiSecret = apiSecret;
         this.senderNumber = senderNumber;
         this.messageService = new DefaultMessageService(apiKey, apiSecret, domain);
+        log.info(
+                "Solapi SMS sender initialized. senderNumberPresent={}, apiKeyPresent={}, apiSecretPresent={}, domain={}",
+                hasText(this.senderNumber),
+                hasText(this.apiKey),
+                hasText(this.apiSecret),
+                domain
+        );
     }
 
     @Override
@@ -39,19 +48,29 @@ public class SolapiSmsSender implements SmsSender {
         }
 
         try {
+            String normalizedTo = normalizePhoneNumber(phone);
+            String normalizedFrom = normalizePhoneNumber(senderNumber);
+            log.info(
+                    "Sending SMS via Solapi. to={}, from={}, title={}",
+                    normalizedTo,
+                    normalizedFrom,
+                    title
+            );
+
             Message sms = new Message();
-            sms.setTo(normalizePhoneNumber(phone));
-            sms.setFrom(normalizePhoneNumber(senderNumber));
+            sms.setTo(normalizedTo);
+            sms.setFrom(normalizedFrom);
             sms.setText(buildText(title, message));
 
             var response = messageService.send(sms);
+            log.info("Solapi send response. response={}", response);
 
             if (response.getFailedMessageList() != null && !response.getFailedMessageList().isEmpty()) {
                 var failed = response.getFailedMessageList().getFirst();
                 return new SmsSendResult(false, "Solapi 발송 실패: " + failed.getStatusMessage());
             }
 
-            return new SmsSendResult(true, "Solapi 발송 접수 완료");
+            return new SmsSendResult(true, "Solapi 요청 접수 완료(실제 수신은 통신사 처리 결과에 따라 달라질 수 있습니다)");
         } catch (Exception exception) {
             return new SmsSendResult(false, "Solapi 발송 예외: " + exception.getMessage());
         }
@@ -67,5 +86,9 @@ public class SolapiSmsSender implements SmsSender {
 
     private String normalizePhoneNumber(String phone) {
         return phone.replaceAll("[^0-9]", "");
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

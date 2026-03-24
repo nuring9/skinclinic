@@ -12,6 +12,7 @@ import com.skinclinic.domain.notification.port.NotificationMemberInfo;
 import com.skinclinic.domain.notification.repository.NotificationHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     private final NotificationHistoryRepository notificationHistoryRepository;
@@ -34,13 +36,22 @@ public class NotificationService {
             return;
         }
 
-        triggerNotificationEvent(new NotificationEventTriggerRequest(
-                1L,
-                NotificationType.RESERVATION,
-                null,
-                null,
-                "2026-03-25 14:00 예약 확정"
-        ));
+        memberNotificationReader.findByMemberId(1L).ifPresentOrElse(
+                member -> {
+                    try {
+                        triggerNotificationEvent(new NotificationEventTriggerRequest(
+                                member.memberId(),
+                                NotificationType.RESERVATION,
+                                null,
+                                null,
+                                "2026-03-25 14:00 예약 확정"
+                        ));
+                    } catch (Exception exception) {
+                        log.warn("초기 알림 더미 데이터 생성은 건너뜁니다. cause={}", exception.getMessage());
+                    }
+                },
+                () -> log.info("memberId=1 회원이 없어 초기 알림 더미 데이터 생성을 건너뜁니다.")
+        );
     }
 
     public List<NotificationResponse> getUserNotifications(Long userId, NotificationType type) {
@@ -164,7 +175,7 @@ public class NotificationService {
         ));
 
         if (firstTry.success()) {
-            history.setDeliverySummary("카카오 나에게 메시지 보내기 성공");
+            history.setDeliverySummary(firstTry.detail());
             return;
         }
 
@@ -197,7 +208,7 @@ public class NotificationService {
                 ));
 
                 if (retryTry.success()) {
-                    history.setDeliverySummary("카카오 토큰 재발급 후 재시도 성공");
+                    history.setDeliverySummary(retryTry.detail());
                     return;
                 }
 
@@ -251,7 +262,9 @@ public class NotificationService {
                 LocalDateTime.now()
         ));
 
-        history.setDeliverySummary(result.success() ? summary + " 성공" : summary + " 실패");
+        history.setDeliverySummary(result.success()
+                ? summary + " 요청 접수 / " + result.detail()
+                : summary + " 실패 / " + result.detail());
     }
 
     private boolean isRetryable(FailureReason failureReason) {

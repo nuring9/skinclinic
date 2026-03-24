@@ -21,12 +21,22 @@ export default function MainLayout() {
           <div className="main-header-auth">
             {isAuthenticated ? (
               <>
+                <Link
+                  to={user?.role === "ROLE_ADMIN" ? "/admin/notifications" : "/mypage"}
+                  className="main-header-link"
+                >
+                  {user?.role === "ROLE_ADMIN" ? "관리자 페이지" : "마이페이지"}
+                </Link>
                 <span>{user.loginId}님</span>
                 <button type="button" onClick={handleLogout}>
                   로그아웃
                 </button>
               </>
-            ) : null}
+            ) : (
+              <Link to="/login" className="main-header-link">
+                로그인
+              </Link>
+            )}
           </div>
         </div>
       </header>

@@ -252,7 +252,9 @@ public class ChatbotService {
         }
 
         String answer = node.answer();
-        boolean aiEnhanced = false;
+  /*
+      빠른 선택 상담 버튼을 눌렀을 때도 gemini로 할 경우.
+     boolean aiEnhanced = false;
 
 
         if (node.leaf()) {
@@ -263,8 +265,10 @@ public class ChatbotService {
             aiEnhanced = result.enhanced();
 
         }
-
         return toResponse(node, answer, aiEnhanced);
+ */
+
+        return toResponse(node, answer, false);
     }
 
     private ChatbotResponse replyByMessage(String message) {

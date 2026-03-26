@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { resolveApiBaseUrl } from "@/api/apiClient";
 import "./auth.css";
 
 function getErrorMessage(error) {
@@ -42,7 +43,7 @@ export default function LoginPage() {
   }
 
   function handleKakaoLogin() {
-    window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+    window.location.href = `${resolveApiBaseUrl()}/oauth2/authorization/kakao`;
   }
 
   return (

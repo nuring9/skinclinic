@@ -3,6 +3,7 @@ package com.skinclinic.global.config;
 import com.skinclinic.global.auth.CustomUserDetails;
 import com.skinclinic.global.auth.oauth.CustomOAuth2UserService;
 import com.skinclinic.domain.member.service.MemberKakaoAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${app.frontend-url:http://localhost:5173}")
+    @Value("${app.frontend-url:}")
     private String frontendUrl;
 
     @Bean
@@ -85,7 +86,8 @@ public class SecurityConfig {
                     .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                     .successHandler((request, response, authentication) -> {
                         syncKakaoNotificationAuth(authentication, authorizedClientServiceProvider, memberKakaoAuthService);
-                        String socialSignupRedirect = buildSocialSignupRedirect(authentication);
+                        String resolvedFrontendUrl = resolveFrontendUrl(request);
+                        String socialSignupRedirect = buildSocialSignupRedirect(authentication, resolvedFrontendUrl);
 
                         if (socialSignupRedirect != null) {
                             new SecurityContextLogoutHandler().logout(request, response, authentication);
@@ -93,10 +95,10 @@ public class SecurityConfig {
                             return;
                         }
 
-                        response.sendRedirect(frontendUrl + "/");
+                        response.sendRedirect(resolvedFrontendUrl + "/");
                     })
                     .failureHandler((request, response, exception) ->
-                            response.sendRedirect(frontendUrl + "/login?socialError=true"))
+                            response.sendRedirect(resolveFrontendUrl(request) + "/login?socialError=true"))
             );
         }
 
@@ -108,7 +110,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private String buildSocialSignupRedirect(Authentication authentication) {
+    private String buildSocialSignupRedirect(Authentication authentication, String resolvedFrontendUrl) {
         if (!(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             return null;
         }
@@ -117,15 +119,41 @@ public class SecurityConfig {
             return null;
         }
 
-        return frontendUrl + "/signup?social=true"
+        return resolvedFrontendUrl + "/signup?social=true"
                 + "&provider=" + encode(userDetails.getAttributes().get("socialProvider"))
                 + "&socialId=" + encode(userDetails.getAttributes().get("socialId"))
                 + "&email=" + encode(userDetails.getAttributes().get("email"))
                 + "&name=" + encode(userDetails.getAttributes().get("name"));
     }
 
+    private String resolveFrontendUrl(HttpServletRequest request) {
+        if (hasText(frontendUrl)) {
+            return frontendUrl;
+        }
+
+        String origin = request.getHeader("Origin");
+        if (hasText(origin)) {
+            return origin;
+        }
+
+        String referer = request.getHeader("Referer");
+        if (hasText(referer)) {
+            int schemeIndex = referer.indexOf("://");
+            if (schemeIndex > -1) {
+                int pathIndex = referer.indexOf('/', schemeIndex + 3);
+                return pathIndex > -1 ? referer.substring(0, pathIndex) : referer;
+            }
+        }
+
+        return "http://localhost:5173";
+    }
+
     private String encode(Object value) {
         return URLEncoder.encode(value == null ? "" : String.valueOf(value), StandardCharsets.UTF_8);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private void syncKakaoNotificationAuth(

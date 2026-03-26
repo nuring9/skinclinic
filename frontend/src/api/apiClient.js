@@ -1,6 +1,6 @@
 import axios from "axios";
 
-function resolveApiBaseUrl() {
+export function resolveApiBaseUrl() {
   if (typeof window === "undefined") {
     return "http://localhost:8080";
   }

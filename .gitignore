@@ -3,13 +3,16 @@
 
 # IDE / Editor
 .idea/
-backend/.idea/
 .vscode/
+.run/
 
 # Backend (Spring Boot / Gradle)
+backend/.idea/
 backend/.gradle/
 backend/build/
 backend/out/
+.gradle/
+coverage/
 
 # Frontend (React / Vite)
 frontend/node_modules/
@@ -17,7 +20,10 @@ frontend/dist/
 frontend/dist-ssr/
 frontend/build/
 
-# Frontend env
+# Env files
+/.env
+/.env.*
+!/.env.example
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
@@ -34,3 +40,7 @@ lerna-debug.log*
 # Local files
 *.local
 *.tmp
+
+backend/src/main/resources/application-*.yml
+backend/src/main/resources/application-*.yaml
+backend/src/main/resources/application-*.properties

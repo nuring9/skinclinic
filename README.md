@@ -1,14 +1,18 @@
 # Skin Clinic
 
-피부 타입 설문을 기반으로 사용자에게 맞춤 시술을 추천하고, 피부 진단 결과와 추천 이력을 확인할 수 있는 피부 클리닉 웹 서비스입니다.
+> 피부 타입 설문을 기반으로 사용자에게 맞춤 시술을 추천하고, 피부 진단 결과와 추천 이력을 확인할 수 있는 피부 클리닉 웹 서비스입니다.
 
 본 프로젝트는 팀 프로젝트로 진행되었으며, 이 저장소는 제가 담당한 **피부 설문, 맞춤 시술 추천, 챗봇 상담, 알림, 마이페이지 일부 기능, 시술 만족도 평가 기능**을 중심으로 정리한 버전입니다.
+
+<br />
 
 ## 프로젝트 소개
 
 Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 문진 정보를 입력하면 설문 결과를 분석하여 적합한 피부 관리 시술을 추천해주는 서비스입니다.
 
 전체 서비스에는 회원 관리, 예약, 결제, 상담, 관리자 기능 등이 포함되어 있으며, 저는 그중 사용자 피부 데이터 수집부터 추천 결과 제공, 알림/상담, 마이페이지 이력 확인, 시술 만족도 평가까지 이어지는 기능을 담당했습니다.
+
+<br />
 
 ## 담당 역할 요약
 
@@ -23,6 +27,8 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
 사용자 서비스 흐름과 직접 연결되는 기능들을 중심으로 담당했습니다.  
 피부 설문, 맞춤 추천, 알림, 상담, 마이페이지, 만족도 평가가 서로 연계되도록 구현했습니다.  
 React 프론트엔드는 정적 파일 형태이기 때문에 S3와 CloudFront를 활용해 배포했습니다.
+
+<br />
 
 ## 담당 기능
 
@@ -84,6 +90,8 @@ React 프론트엔드는 정적 파일 형태이기 때문에 S3와 CloudFront�
 - 관리자 전체 시술 리뷰 조회 기능 구현
 - 관리자 시술 만족도 통계 확인 기능 구현
 
+<br />
+
 ## 전체 서비스 주요 기능
 
 팀 프로젝트 전체 서비스에는 아래 기능들이 포함되어 있습니다.
@@ -100,37 +108,25 @@ React 프론트엔드는 정적 파일 형태이기 때문에 S3와 CloudFront�
 - 관리자 회원/시술/예약/결제/상담/알림 관리
 - 시술 만족도 통계
 
+<br />
+
 ## 기술 스택
 
 ### Backend
 
-- Java 21
-- Spring Boot 3.5.11
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- OAuth2 Client
-- Validation
-- WebSocket
-- Lombok
-- MySQL
-- Java Mail
-- Solapi SMS SDK
-- Kakao API
-- Gemini API
+`Java 21` `Spring Boot 3.5.11` `Spring Web` `Spring Data JPA` `Spring Security`  
+`OAuth2 Client` `Validation` `WebSocket` `Lombok` `MySQL`  
+`Java Mail` `Solapi SMS SDK` `Kakao API` `Gemini API`
 
 ### Frontend
 
-- React 19
-- Vite
-- React Router DOM
-- Axios
-- CSS
+`React 19` `Vite` `React Router DOM` `Axios` `CSS`
 
 ### Deployment
 
-- AWS S3
-- AWS CloudFront
+`AWS S3` `AWS CloudFront`
+
+<br />
 
 ## 배포 경험
 
@@ -140,9 +136,11 @@ React 프론트엔드는 빌드 후 HTML, CSS, JavaScript 정적 파일로 제�
 
 다만 팀 프로젝트 진행 과정에서 백엔드 서버 배포가 완료되지 않아, 최종 동작 확인은 로컬 백엔드 서버와 연동하는 방식으로 진행했습니다.
 
+<br />
+
 ## 담당 기능 프로젝트 구조
 
-````text
+```text
 clinic
 ├── skinclinic-back
 │   └── src/main/java/com/skinclinic
@@ -174,7 +172,9 @@ clinic
             ├── mypage
             ├── recommendation
             └── skin-survey
+```
 
+<br />
 
 ## 주요 API
 
@@ -228,6 +228,8 @@ clinic
 | GET | `/api/admin/procedure-review-stats` | 관리자 만족도 통계 조회 |
 | GET | `/api/admin/procedure-reviews` | 관리자 전체 시술 리뷰 조회 |
 
+<br />
+
 ## 추천 로직 요약
 
 사용자가 입력한 피부 설문 데이터는 다음 기준으로 점수화됩니다.
@@ -252,6 +254,8 @@ clinic
 - 피부 장벽 관리
 - 저자극 관리
 
+<br />
+
 ## 실행 방법
 
 ### Backend
@@ -259,7 +263,7 @@ clinic
 ```bash
 cd skinclinic-back
 ./gradlew bootRun
-````
+```
 
 Backend 기본 주소:
 
@@ -280,6 +284,8 @@ Frontend 기본 주소:
 ```text
 http://localhost:5173
 ```
+
+<br />
 
 ## 환경 변수
 
@@ -302,6 +308,8 @@ GEMINI_CHAT_API_KEY=
 GEMINI_VISION_API_KEY=
 ```
 
+<br />
+
 ## 구현하며 고려한 점
 
 - 설문 입력값을 단순 저장하는 데서 끝내지 않고, 추천 로직과 연결되도록 데이터 구조를 설계했습니다.
@@ -311,6 +319,8 @@ GEMINI_VISION_API_KEY=
 - 알림 기능은 단순 목록 조회뿐 아니라 읽음 처리, 관리자 알림 생성, 카카오/SMS 발송 흐름까지 고려했습니다.
 - 시술 만족도 평가는 사용자 한줄평 수집과 관리자 통계 확인이 가능하도록 구성했습니다.
 - 프론트엔드 배포 과정에서 React 빌드 결과물을 정적 파일로 제공하고, S3와 CloudFront를 활용해 배포하는 흐름을 경험했습니다.
+
+<br />
 
 ## 기대 효과
 

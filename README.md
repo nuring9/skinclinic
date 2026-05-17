@@ -22,10 +22,19 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
   <img src="./images/skin-survey-1.png" width="800" alt="피부 설문 시작 화면">
 </p>
 
-<p align="center" style="display: flex; align-items: flex-start; justify-content: center; gap: 20px;">
-  <img src="./images/skin-survey-2.jpg" width="45%" alt="피부 설문 선택 화면">
-  <img src="./images/skin-survey-3.jpg" width="45%" alt="피부 설문 문진 화면">
-</p>
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./images/skin-survey-2.jpg" width="100%" alt="피부 설문 선택 화면">
+    </td>
+    <td width="50%" valign="top">
+      <img src="./images/skin-survey-3.jpg" width="100%" alt="피부 설문 문진 화면">
+    </td>
+  </tr>
+</table>
+
+<br />
+
 ### 맞춤 시술 추천
 
 <p align="center">
@@ -33,12 +42,16 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
   <img src="./images/recommendation-2.png" width="56%" alt="맞춤 시술 추천 상세 화면">
 </p>
 
+<br />
+
 ### 마이페이지
 
 <p align="center">
   <img src="./images/dashboard-1.jpg" width="38%" alt="마이페이지 대시보드 화면">
   <img src="./images/dashboard-2.jpg" width="46%" alt="마이페이지 이력 조회 화면">
 </p>
+
+<br />
 
 ### 챗봇 상담
 
@@ -53,6 +66,8 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
   <img src="./images/chatbot-5.png" width="22%" alt="챗봇 상담 화면 4">
 </p>
 
+<br />
+
 ### 알림
 
 <p align="center">
@@ -61,12 +76,14 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
   <img src="./images/notification-3.png" width="32%" alt="알림 상세 화면">
 </p>
 
+<br />
+
 ### 시술 만족도 평가
 
 <p align="center">
   <img src="./images/review-1.jpg" width="56%" alt="시술 만족도 평가 목록 화면">
-
 </p>
+
 <p align="center">
   <img src="./images/review-2.jpg" width="42%" alt="시술 만족도 평가 작성 화면">
 </p>

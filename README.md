@@ -38,13 +38,13 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
 
 <p align="center">
   <img src="./images/dashboard-1.jpg" width="38%" alt="마이페이지 대시보드 화면">
-  <img src="./images/dashboard-2.jpg" width="56%" alt="마이페이지 이력 조회 화면">
+  <img src="./images/dashboard-2.jpg" width="46%" alt="마이페이지 이력 조회 화면">
 </p>
 
 ### 챗봇 상담
 
 <p align="center">
-  <img src="./images/chatbot-1.png" width="280" alt="챗봇 상담 진입 화면">
+  <img src="./images/chatbot-1.png" width="180" alt="챗봇 상담 진입 화면">
 </p>
 
 <p align="center">
@@ -66,12 +66,15 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
 
 <p align="center">
   <img src="./images/review-1.jpg" width="56%" alt="시술 만족도 평가 목록 화면">
-  <img src="./images/review-4.jpg" width="38%" alt="시술 만족도 평가 통계 화면">
+
+</p>
+<p align="center">
+  <img src="./images/review-2.jpg" width="42%" alt="시술 만족도 평가 작성 화면">
 </p>
 
 <p align="center">
-  <img src="./images/review-2.jpg" width="42%" alt="시술 만족도 평가 작성 화면">
   <img src="./images/review-3.jpg" width="42%" alt="시술 만족도 평가 상세 화면">
+  <img src="./images/review-4.jpg" width="38%" alt="시술 만족도 평가 통계 화면">
 </p>
 
 <br />

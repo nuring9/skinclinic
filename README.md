@@ -14,6 +14,68 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
 
 <br />
 
+## 프로젝트 화면
+
+### 피부 설문
+
+<p align="center">
+  <img src="./images/skin-survey-1.png" width="800" alt="피부 설문 시작 화면">
+</p>
+
+<p align="center">
+  <img src="./images/skin-survey-2.jpg" width="48%" alt="피부 설문 선택 화면">
+  <img src="./images/skin-survey-3.jpg" width="38%" alt="피부 설문 문진 화면">
+</p>
+
+### 맞춤 시술 추천
+
+<p align="center">
+  <img src="./images/recommendation-1.jpg" width="38%" alt="맞춤 시술 추천 결과 화면">
+  <img src="./images/recommendation-2.png" width="56%" alt="맞춤 시술 추천 상세 화면">
+</p>
+
+### 마이페이지
+
+<p align="center">
+  <img src="./images/dashboard-1.jpg" width="38%" alt="마이페이지 대시보드 화면">
+  <img src="./images/dashboard-2.jpg" width="56%" alt="마이페이지 이력 조회 화면">
+</p>
+
+### 챗봇 상담
+
+<p align="center">
+  <img src="./images/chatbot-1.png" width="280" alt="챗봇 상담 진입 화면">
+</p>
+
+<p align="center">
+  <img src="./images/chatbot-2.png" width="22%" alt="챗봇 상담 화면 1">
+  <img src="./images/chatbot-3.png" width="22%" alt="챗봇 상담 화면 2">
+  <img src="./images/chatbot-4.png" width="22%" alt="챗봇 상담 화면 3">
+  <img src="./images/chatbot-5.png" width="22%" alt="챗봇 상담 화면 4">
+</p>
+
+### 알림
+
+<p align="center">
+  <img src="./images/notification-1.png" width="32%" alt="알림 목록 화면">
+  <img src="./images/notification-2.png" width="32%" alt="관리자 알림 생성 화면">
+  <img src="./images/notification-3.png" width="32%" alt="알림 상세 화면">
+</p>
+
+### 시술 만족도 평가
+
+<p align="center">
+  <img src="./images/review-1.jpg" width="56%" alt="시술 만족도 평가 목록 화면">
+  <img src="./images/review-4.jpg" width="38%" alt="시술 만족도 평가 통계 화면">
+</p>
+
+<p align="center">
+  <img src="./images/review-2.jpg" width="42%" alt="시술 만족도 평가 작성 화면">
+  <img src="./images/review-3.jpg" width="42%" alt="시술 만족도 평가 상세 화면">
+</p>
+
+<br />
+
 ## 담당 역할 요약
 
 - 사용자 피부 설문 및 분석 결과 화면 구현
@@ -138,6 +200,22 @@ React 프론트엔드는 빌드 후 HTML, CSS, JavaScript 정적 파일로 제�
 
 <br />
 
+## 배포 화면
+
+### AWS S3 정적 파일 배포
+
+<p align="center">
+  <img src="./images/s3-deployment.png" width="800" alt="AWS S3 배포 화면">
+</p>
+
+### CloudFront CDN 배포
+
+<p align="center">
+  <img src="./images/cloudfront-deployment.png" width="800" alt="AWS CloudFront 배포 화면">
+</p>
+
+<br />
+
 ## 담당 기능 프로젝트 구조
 
 ```text
@@ -180,53 +258,53 @@ clinic
 
 ### 피부 설문
 
-| Method | URL | 설명 |
-| --- | --- | --- |
-| POST | `/api/skin-surveys` | 피부 설문 저장 |
-| GET | `/api/skin-surveys/{id}` | 설문 단건 조회 |
-| GET | `/api/skin-surveys/me/latest` | 내 최신 설문 조회 |
-| GET | `/api/skin-surveys/users/{userId}/latest` | 사용자 최신 설문 조회 |
-| GET | `/api/skin-surveys/users/{userId}` | 사용자 설문 이력 조회 |
+| Method | URL                                       | 설명                  |
+| ------ | ----------------------------------------- | --------------------- |
+| POST   | `/api/skin-surveys`                       | 피부 설문 저장        |
+| GET    | `/api/skin-surveys/{id}`                  | 설문 단건 조회        |
+| GET    | `/api/skin-surveys/me/latest`             | 내 최신 설문 조회     |
+| GET    | `/api/skin-surveys/users/{userId}/latest` | 사용자 최신 설문 조회 |
+| GET    | `/api/skin-surveys/users/{userId}`        | 사용자 설문 이력 조회 |
 
 ### 맞춤 추천
 
-| Method | URL | 설명 |
-| --- | --- | --- |
-| POST | `/api/recommendations` | 추천 결과 생성 |
-| GET | `/api/recommendations/{recommendationId}` | 추천 결과 상세 조회 |
-| GET | `/api/recommendations` | 전체 추천 이력 조회 |
-| GET | `/api/recommendations/users/{userId}` | 사용자 추천 이력 조회 |
-| GET | `/api/recommendations/survey/{surveyId}` | 설문 기준 추천 이력 조회 |
+| Method | URL                                       | 설명                     |
+| ------ | ----------------------------------------- | ------------------------ |
+| POST   | `/api/recommendations`                    | 추천 결과 생성           |
+| GET    | `/api/recommendations/{recommendationId}` | 추천 결과 상세 조회      |
+| GET    | `/api/recommendations`                    | 전체 추천 이력 조회      |
+| GET    | `/api/recommendations/users/{userId}`     | 사용자 추천 이력 조회    |
+| GET    | `/api/recommendations/survey/{surveyId}`  | 설문 기준 추천 이력 조회 |
 
 ### 챗봇
 
-| Method | URL | 설명 |
-| --- | --- | --- |
-| GET | `/api/chatbot/welcome` | 챗봇 초기 메시지 조회 |
-| POST | `/api/chatbot/messages` | 챗봇 메시지 전송 |
+| Method | URL                     | 설명                  |
+| ------ | ----------------------- | --------------------- |
+| GET    | `/api/chatbot/welcome`  | 챗봇 초기 메시지 조회 |
+| POST   | `/api/chatbot/messages` | 챗봇 메시지 전송      |
 
 ### 알림
 
-| Method | URL | 설명 |
-| --- | --- | --- |
-| GET | `/api/notifications/users/{userId}` | 사용자 알림 조회 |
-| GET | `/api/notifications/users/{userId}/unread-count` | 읽지 않은 알림 개수 조회 |
-| PATCH | `/api/notifications/{notificationId}/read` | 알림 읽음 처리 |
-| POST | `/api/notifications/me/test` | 내 알림 테스트 생성 |
-| GET | `/api/admin/notifications` | 관리자 전체 알림 조회 |
-| GET | `/api/admin/notifications/members` | 알림 대상 회원 조회 |
-| POST | `/api/admin/notifications` | 관리자 알림 생성 |
-| POST | `/api/admin/notifications/events` | 이벤트 기반 알림 생성 |
+| Method | URL                                              | 설명                     |
+| ------ | ------------------------------------------------ | ------------------------ |
+| GET    | `/api/notifications/users/{userId}`              | 사용자 알림 조회         |
+| GET    | `/api/notifications/users/{userId}/unread-count` | 읽지 않은 알림 개수 조회 |
+| PATCH  | `/api/notifications/{notificationId}/read`       | 알림 읽음 처리           |
+| POST   | `/api/notifications/me/test`                     | 내 알림 테스트 생성      |
+| GET    | `/api/admin/notifications`                       | 관리자 전체 알림 조회    |
+| GET    | `/api/admin/notifications/members`               | 알림 대상 회원 조회      |
+| POST   | `/api/admin/notifications`                       | 관리자 알림 생성         |
+| POST   | `/api/admin/notifications/events`                | 이벤트 기반 알림 생성    |
 
 ### 시술 만족도 평가
 
-| Method | URL | 설명 |
-| --- | --- | --- |
-| GET | `/api/procedure-reviews/users/{userId}/candidates` | 만족도 평가 대상 조회 |
-| GET | `/api/procedure-reviews/users/{userId}` | 사용자 시술 리뷰 조회 |
-| POST | `/api/procedure-reviews` | 시술 만족도 평가 등록 |
-| GET | `/api/admin/procedure-review-stats` | 관리자 만족도 통계 조회 |
-| GET | `/api/admin/procedure-reviews` | 관리자 전체 시술 리뷰 조회 |
+| Method | URL                                                | 설명                       |
+| ------ | -------------------------------------------------- | -------------------------- |
+| GET    | `/api/procedure-reviews/users/{userId}/candidates` | 만족도 평가 대상 조회      |
+| GET    | `/api/procedure-reviews/users/{userId}`            | 사용자 시술 리뷰 조회      |
+| POST   | `/api/procedure-reviews`                           | 시술 만족도 평가 등록      |
+| GET    | `/api/admin/procedure-review-stats`                | 관리자 만족도 통계 조회    |
+| GET    | `/api/admin/procedure-reviews`                     | 관리자 전체 시술 리뷰 조회 |
 
 <br />
 

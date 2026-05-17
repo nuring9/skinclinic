@@ -22,11 +22,10 @@ Skin Clinic은 사용자가 피부 타입, 피부 고민, 고민 부위, 추가 
   <img src="./images/skin-survey-1.png" width="800" alt="피부 설문 시작 화면">
 </p>
 
-<p align="center">
-  <img src="./images/skin-survey-2.jpg" width="48%" alt="피부 설문 선택 화면">
-  <img src="./images/skin-survey-3.jpg" width="38%" alt="피부 설문 문진 화면">
+<p align="center" style="display: flex; align-items: flex-start; justify-content: center; gap: 20px;">
+  <img src="./images/skin-survey-2.jpg" width="45%" alt="피부 설문 선택 화면">
+  <img src="./images/skin-survey-3.jpg" width="45%" alt="피부 설문 문진 화면">
 </p>
-
 ### 맞춤 시술 추천
 
 <p align="center">
